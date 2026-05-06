@@ -1,0 +1,150 @@
+""" rules for running reditools """
+
+rule reditools:
+   input:
+     bam = "{data}/star/{sample}/{sample}_dedup_sorted.bam",
+   output:
+     tbl = "{data}/reditools/{sample}/{sample}_{chrom}.txt",
+   params:
+     job_name = "rtools",
+     rtools = config["REDITOOLS_PARAMS"],
+     edit_sites = config["EDIT_SITES"],
+     tmpdir = "{data}/reditools/{sample}/",
+     memory = "select[mem>10] rusage[mem=10]",
+   log:
+     "{data}/logs/rtools/{sample}/{sample}_{chrom}.txt"
+   message:
+     "running rtools alignments "
+   threads: 1
+   resources: all_threads=1
+   run:
+     
+     if params.edit_sites != "":
+       cmd = f"python2.7 {REDITOOLS}/REDItoolKnown.py "
+       
+       tbx_cmd = f"tabix {params.edit_sites} {wildcards.chrom} | cut -f 1,4,7 "
+       tbx_cmd += " > "
+       tmp_site_output = os.path.join(params.tmpdir, f"{wildcards.chrom}_site.txt")
+       tbx_cmd += tmp_site_output
+       print(tbx_cmd)
+       shell(tbx_cmd)
+       
+       cmd += f" -l {tmp_site_output} "
+
+     else:
+       cmd = f"python2.7 {REDITOOLS}/REDItoolDnaRna.py "
+     cmd += f" -i {input.bam} -f {GENOME} "
+     cmd += f" -o {params.tmpdir} "
+     cmd += f" -F {wildcards.chrom} "
+     cmd += f" -z {wildcards.sample}_{wildcards.chrom}.txt "
+     cmd += f" {params.rtools} "
+
+     print(cmd)
+     shell(cmd)
+     os.rename(os.path.join(params.tmpdir,
+                            wildcards.chrom,
+                            f"{wildcards.sample}_{wildcards.chrom}.txt"),
+               output.tbl)
+     os.remove(f"{tmp_site_output}.gz")
+     os.remove(f"{tmp_site_output}.gz.tbi")
+
+rule reditools_annot:
+   input:
+     DATA + "/reditools/{sample}/{sample}_{chrom}.txt",
+   output:
+     DATA + "/reditools/{sample}/annotated_{sample}_{chrom}.txt",
+   params:
+     job_name = "rtools",
+     accesory_scripts = config["ACCESSORY_SRC"],
+     snps_293 = config["ANNOT_PARAMS"]["SNP_293"],
+     snps = config["ANNOT_PARAMS"]["SNP"],
+     tx = config["ANNOT_PARAMS"]["TX"],
+     rmsk = config["ANNOT_PARAMS"]["REPEATS"],
+     memory = "select[mem>10] rusage[mem=10]",
+   log:
+     DATA + "/logs/rtools/{sample}/{sample}_{chrom}_annot.txt"
+   message:
+     "annotating reditools "
+   threads: 1
+   resources: all_threads=1
+   run:
+     cmd = f"python2.7 {params.accesory_scripts}/AnnotateTable.py "
+     cmd += f" -i {input} "
+     cmd += f" -o {output}.293snp.tmp"
+     cmd += f" -s 7 "
+     cmd += f" {params.snps_293} "
+     print(cmd)
+     shell(cmd)
+     
+     cmd = f"python2.7 {params.accesory_scripts}/AnnotateTable.py "
+     cmd += f" -i {output}.293snp.tmp "
+     cmd += f" -o {output}.snp.tmp"
+     cmd += f" -s 7 "
+     cmd += f" {params.snps} "
+     print(cmd)
+     shell(cmd)
+        
+     cmd = f"python2.7 {params.accesory_scripts}/AnnotateTable.py "
+     cmd += f" -i {output}.snp.tmp "
+     cmd += f" -o {output}.tx.tmp "
+     cmd += f" -s 7 "
+     cmd += f" {params.tx} "
+     print(cmd)
+     shell(cmd)
+     
+     cmd = f"python2.7 {params.accesory_scripts}/AnnotateTable.py "
+     cmd += f" -i {output}.tx.tmp "
+     cmd += f" -o {output}"
+     cmd += f" -s 7 "
+     cmd += f" {params.rmsk} "
+     print(cmd)
+     shell(cmd)
+
+     shell("rm {output}.293snp.tmp {output}.tx.tmp {output}.snp.tmp")
+
+rule merge_reditools:
+   input:
+     expand(DATA + "/reditools/{{sample}}/annotated_{{sample}}_{chrom}.txt",
+             chrom = CHROMS)
+   output:
+     temp(DATA + "/reditools/{sample}_merged_annotated.txt"),
+   params:
+     job_name = "merge_rtools",
+     memory = "select[mem>25] rusage[mem=25]",
+   log:
+     DATA + "/logs/rtools/{sample}_merge.txt"
+   message:
+     "merging rtools "
+   threads: 12
+   resources: all_threads=12
+   shell:
+     """
+     cat {input} \
+       | sort \
+         -k1,1 \
+         -k2,2n \
+         -S 1G \
+         --parallel 12 \
+         > {output}
+     """
+
+rule compress_reditools:
+   input:
+     DATA + "/reditools/{sample}_merged_annotated.txt",
+   output:
+     gz = DATA + "/reditools/{sample}_merged_annotated.txt.gz",
+     idx = DATA + "/reditools/{sample}_merged_annotated.txt.gz.tbi",
+   params:
+     job_name = "comp_rtools",
+     memory = "select[mem>25] rusage[mem=25]",
+   log:
+     DATA + "/logs/rtools/{sample}_compress.txt"
+   message:
+     "compress rtools "
+   threads: 1
+   resources: all_threads=1
+   shell:
+     """
+     bgzip {input}
+     tabix -b 2 -e 2 -s 1 -f {output.gz} 
+     """

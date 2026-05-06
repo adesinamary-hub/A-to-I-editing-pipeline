@@ -1,0 +1,32 @@
+""" rules to QC RNA-Seq libs """
+import os
+
+def _get_fq(wildcards):
+    res = SAMPLE_DICT[wildcards.sample][wildcards.fq][wildcards.read]
+    return res
+
+rule qc:
+  input: 
+    _get_fq 
+  output:
+    html = os.path.join(DATA, "qc_stats", "falco", "{sample}", "{fq}_{read}.html"),
+    summary = os.path.join(DATA, "qc_stats", "falco",
+            "{sample}", "{fq}_{read}.summary.txt"),
+    data = os.path.join(DATA, "qc_stats", "falco",
+            "{sample}", "{fq}_{read}.data.txt"),
+  params:
+    job_name = "fastqc.{sample}",
+    memory = "select[mem>16] rusage[mem=16]",
+  log:
+    os.path.join(DATA, "logs", "qc_stats", "fastqc", "{sample}_{fq}_{read}.txt")
+  shell:
+    """
+    falco \
+      -f fastq \
+      -D {output.data} \
+      -R {output.html} \
+      -S {output.summary} \
+      {input}
+    """
+
+

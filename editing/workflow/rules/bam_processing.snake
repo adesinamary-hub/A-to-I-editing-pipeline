@@ -1,0 +1,90 @@
+
+""" rules for star mapping """
+
+def _trimmed_fq_inputs(wildcards, read):
+    sample = wildcards.sample
+    data =  wildcards.data
+    fq_str = "{data}/fastq/trimmed/{sample}/{fq}_{read}.fastq.gz"
+    return expand(fq_str,
+            data = data,
+            sample = sample,
+            read = read,
+            fq = SAMPLE_DICT[sample].keys())
+
+rule star:
+   input:
+     r1 = lambda wc: _trimmed_fq_inputs(wc, "R1"),
+     r2 = lambda wc: _trimmed_fq_inputs(wc, "R2"),
+     genome = GENOME_DIR + "/Genome",
+   output:
+     bam = temp("{data}/star/{sample}/{sample}_Aligned.out.bam"),
+     m1 = "{data}/star/{sample}/{sample}_Unmapped.out.mate1.fastq.gz",
+     m2 = "{data}/star/{sample}/{sample}_Unmapped.out.mate2.fastq.gz",
+   params:
+     job_name = "star",
+     out = "{data}/star/{sample}/{sample}_",
+     memory = "select[mem>45] rusage[mem=45]",
+     r1 = lambda wc: ",".join(_trimmed_fq_inputs(wc, "R1")),
+     r2 = lambda wc: ",".join(_trimmed_fq_inputs(wc, "R2")),
+     rg = lambda wc: " , ".join(["ID:" + x for x in SAMPLE_DICT[wc.sample].keys()]),
+   log:
+     "{data}/logs/star/{sample}_align.txt"
+   message:
+     "running star alignments "
+   threads:
+     12
+   resources: all_threads=12
+   shell:
+     """
+     STAR \
+       --genomeDir {GENOME_DIR}  \
+       --runThreadN {threads} \
+       --readFilesIn {params.r1} {params.r2} \
+       --readFilesCommand gunzip -c \
+       --outSAMattrRGline {params.rg} \
+       --outFileNamePrefix {params.out} \
+       --outSAMattributes NH HI AS nM MD \
+       --outSAMtype BAM Unsorted \
+       --outReadsUnmapped Fastx \
+       --outSAMunmapped Within \
+       --outFilterType BySJout \
+       --alignSJoverhangMin 8 \
+       --alignSJDBoverhangMin 1 \
+       --outFilterMismatchNoverLmax 0.04 \
+       --alignIntronMin 20 \
+       --alignIntronMax 1000000 \
+       --alignMatesGapMax 1000000
+     
+     gzip -f -S .fastq.gz {params.out}Unmapped.out.mate1 
+     gzip -f -S .fastq.gz {params.out}Unmapped.out.mate2 
+     """
+
+rule mark_duplicates:
+  input:
+    bam = rules.star.output.bam 
+  output:
+    bam = "{data}/star/{sample}/{sample}_dedup_sorted.bam",
+    bai = "{data}/star/{sample}/{sample}_dedup_sorted.bam.bai",
+  params:
+    tmpdir = "{data}/star/{sample}/tmp",
+    job_name = "mark_dups",
+    memory = "select[mem>36] rusage[mem=36]",
+  log:
+    "{data}/logs/markdups/{sample}_duplicate_marking.txt"
+  threads: 
+      12
+  message:
+    "marking duplicates  "
+  shell:
+    """
+    rm -rf {params.tmpdir}
+    mkdir -p {params.tmpdir}
+
+    samtools collate -@ 4 -O -u {input.bam} {params.tmpdir}/collate \
+      | samtools fixmate -@ 4 -m -u - - \
+      | samtools sort -@ 4 -u -T {params.tmpdir}/sorted - \
+      | samtools markdup -@ 4 -T {params.tmpdir}/mrkdup - {output.bam} 
+    
+    rm -rf {params.tmpdir}
+    samtools index -@ 11 {output.bam}
+    """

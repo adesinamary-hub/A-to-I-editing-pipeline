@@ -1,0 +1,13 @@
+fastq_id    sample_id   lib_type
+1 wt_minus-ifnb fr-firststrand
+2_1 wt_plus-ifnb  fr-firststrand
+3_1 adar1ko_minus-ifnb fr-firststrand
+4_1 adar1ko_plus-ifnb fr-firststrand
+5_1 adar1p150ko_minus-ifnb fr-firststrand
+6 adar1p150ko_plus-ifnb fr-firststrand
+7 adar1p150int_minus-ifnb_minus-dox_24hrs fr-firststrand
+8 adar1p150int_minus-ifnb_plus-dox_24hrs fr-firststrand
+9 adar1p150int_plus-ifnb_minus-dox_24hrs fr-firststrand
+10 adar1p150int_plus-ifnb_plus-dox_24hrs fr-firststrand
+11 adar1p150int_minus-ifnb_plus-dox_48hrs fr-firststrand
+12 adar1p150int_plus-ifnb_plus-dox_48hrs fr-firststrand

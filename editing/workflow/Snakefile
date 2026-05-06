@@ -1,0 +1,82 @@
+shell.executable("/bin/bash")
+import os
+import sys
+import datetime
+from glob import glob
+
+from itertools import cycle,repeat
+""" Snakemake pipeline for RNA editing detection from RNA-Seq data """
+
+configfile: "config/config.yaml"
+
+RAW_DATA = config["RAW_DATA"]
+DATA = config["DATA"]
+
+LIB = "../src"
+DBASES = "../dbases"
+RESULTS = "../results"
+DOCS = "../docs"
+
+LIB_PARAMS = config["LIB_PARAMS"]
+GENOME = config["GENOME"]
+GENOME_DIR = config["GENOME_DIR"]
+CHROM_SIZES = config["CHROM_SIZES"]
+FQSUFFIX = config["FASTQ_SUFFIX"]
+TRANSCRIPTS = config["TRANSCRIPTS"]
+SALMON_IDX = config["SALMON_IDX"]
+CMD_PARAMS = config["CMD_PARAMS"]
+
+SAMPLE_DICT = {}
+
+container: config["SINGULARITY"]
+
+with open(LIB_PARAMS, 'r') as f:
+    hdr = f.readline()
+
+    for line in f:
+        if line.startswith("#"): continue
+        fields = line.split()
+        if len(fields) < 2: continue
+
+        fq_prefix = fields[0]
+        sample_id = fields[1]
+        fq_paths = {}
+        for read,suf in FQSUFFIX.items():
+          fq = os.path.join(RAW_DATA, fq_prefix + suf)
+          if not os.path.isfile(fq):
+              sys.stderr.write(f"unable to find {fq}\n")
+          fq_paths[read] = fq
+        
+        if len(fq_paths.values()) == 0:
+          sys.exit(f"unable to find fastqs for {fq_prefix}") 
+               
+        if sample_id not in SAMPLE_DICT:
+            SAMPLE_DICT[sample_id] = {}
+
+        SAMPLE_DICT[sample_id][fq_prefix] = fq_paths
+
+qc_inputs = []
+for sample in SAMPLE_DICT:
+    for fq_id in SAMPLE_DICT[sample]:
+        base = os.path.join(DATA, "qc_stats", "falco", sample, fq_id)
+        for read in FQSUFFIX.keys():
+            for suf in ["html", "summary.txt", "data.txt"]:
+                qc_inputs.append(f"{base}_{read}.{suf}")
+rule all:
+  input:
+    GENOME_DIR + "/Genome",
+    #qc_inputs,
+    expand(os.path.join(DATA,
+      "star",
+      "{sample}",
+      "{sample}_dedup_sorted.{ext}"),
+        sample = SAMPLE_DICT.keys(), 
+        ext = ["bam", "bam.bai"]),
+    
+    expand("{data}/salmon/{sample}/quant.sf",
+      data = DATA, sample=SAMPLE_DICT.keys()),
+
+include: "rules/trim_fqs.snake"
+include: "rules/bam_processing.snake"
+include: "rules/qc_check.snake"
+include: "rules/salmon.snake"

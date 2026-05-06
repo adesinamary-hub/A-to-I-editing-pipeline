@@ -1,0 +1,4 @@
+for reasons unknown, cutadapt is hanging when executed through snakemake. 
+it works fine when try directly in singularity container (v 4.7). 
+
+using the bodhi version at 4.6 works fine...

@@ -1,0 +1,31 @@
+
+
+
+def _get_fqs(wildcards):
+    return list(SAMPLE_DICT[wildcards.sample][wildcards.fq].values())
+
+rule cutadapt:
+   input:
+     fqs = _get_fqs, 
+   output:
+     r1 = temp("{data}/fastq/trimmed/{sample}/{fq}_R1.fastq.gz"), 
+     r2 = temp("{data}/fastq/trimmed/{sample}/{fq}_R2.fastq.gz"),
+   params:
+     job_name = "trim",
+     cutadapt = config["CMD_PARAMS"]["cutadapt"],
+     memory = "select[mem>10] rusage[mem=10]",
+   log:
+     "{data}/logs/cutadapt/{sample}_{fq}_trim"
+   message:
+     "trimming reads "
+   threads: 6
+   shell:
+     """
+     cutadapt \
+       {params.cutadapt} \
+       -o {output.r1} \
+       -p {output.r2} \
+       -j {threads} \
+       {input}
+     """
+     

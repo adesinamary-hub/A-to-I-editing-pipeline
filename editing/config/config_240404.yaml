@@ -1,0 +1,35 @@
+# config for RNA-Variant discovery snakemake pipeline #
+
+RAW_DATA:
+    "/beevol/home/riemondy/Projects/vicens/data/2024-04-04/raw_data"
+
+DATA: 
+    "/beevol/home/riemondy/Projects/vicens/data/2024-04-04"
+
+LIB_PARAMS:
+  "config/lib_params_240404.tsv"
+
+GENOME:
+  "/beevol/home/rbilab/ref/genome/human/GRCh38/dna/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+CHROM_SIZES:
+  "/beevol/home/rbilab/ref/genome/human/GRCh38/dna/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa.fai"
+GENOME_DIR:
+    "/beevol/home/rbilab/ref/indices/star/human/GRCh38-UCSC-2.7.9a"
+
+FASTQ_SUFFIX:
+    R1: "_1.fq.gz"
+    R2: "_2.fq.gz"
+
+SALMON_IDX:
+    "../../dbases/indices/salmon/gencode.v35.transgenes/salmon_idx"
+
+TRANSCRIPTS:
+    "../../dbases/seqs/transcripts/gencode.v35.transcripts.transgene.fasta"
+
+CMD_PARAMS:
+    cutadapt: " -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -m 30 "
+    fastp: " -u 10 -l 50 -y -x -q 25 "
+    salmon_quant: " --validateMappings --libType 'A' --numBootstraps 50 "
+    salmon_idx: " -k 31 --gencode "
+        
+SINGULARITY: "/beevol/home/riemondy/Projects/vicens/docker/adarp150.sif"

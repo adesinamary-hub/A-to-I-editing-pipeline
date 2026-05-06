@@ -1,0 +1,72 @@
+""" rules for psuedo alignment via salmon """
+from os import path
+
+def _trimmed_fq_inputs(wildcards, read):
+    sample = wildcards.sample
+    data =  wildcards.data
+    fq_str = "{data}/fastq/trimmed/{sample}/{fq}_{read}.fastq.gz"
+    return expand(fq_str,
+            data = data,
+            sample = sample,
+            read = read,
+            fq = SAMPLE_DICT[sample].keys())
+
+rule salmon_quant:
+    """
+    run salmon quant
+    """
+    input:
+      idx = path.join(SALMON_IDX, "mphf.bin"),
+      r1 = lambda wc: _trimmed_fq_inputs(wc, "R1"),
+      r2 = lambda wc: _trimmed_fq_inputs(wc, "R2"),
+      gtf = TRANSCRIPTS 
+    output:
+      path.join("{data}", "salmon", "{sample}", "quant.sf")
+    params:
+      settings = CMD_PARAMS["salmon_quant"],
+      idx = SALMON_IDX,
+      out_dir = path.join("{data}", "salmon", "{sample}"),
+      r1 = lambda wc: " ".join(_trimmed_fq_inputs(wc, "R1")),
+      r2 = lambda wc: " ".join(_trimmed_fq_inputs(wc, "R2")),
+      job_name = "salmon_fishin",
+      memory = "select[mem>30] rusage[mem=30]",
+    log:
+      path.join("{data}", "logs", "salmon", "{sample}")
+    threads: 12
+    resources: all_threads=12
+    message: "quantifying with salmon"
+    shell:
+      """
+      salmon quant \
+        -i {params.idx} \
+        {params.settings} \
+        -1 {params.r1} \
+        -2 {params.r2} \
+        -o {params.out_dir} \
+        -p {threads} 
+      """
+
+rule salmon_idx:
+    input:
+      fasta = TRANSCRIPTS
+    output:
+      path.join(SALMON_IDX, "mphf.bin")
+    params:
+      outname = SALMON_IDX,
+      idx_params = CMD_PARAMS["salmon_idx"],
+      job_name = "salmon_idx",
+      memory = "select[mem>30] rusage[mem=30]",
+    log:
+      path.join(SALMON_IDX, "logs", "salmon_index", "generate_salmon_index.txt")
+    threads: 12
+    resources:
+        all_threads=12,
+    message: "building salmon index "
+    shell:
+      """
+      salmon index \
+        -t {input.fasta} \
+        -i {params.outname} \
+        -p {threads} \
+        {params.idx_params}
+      """
