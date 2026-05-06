@@ -1,0 +1,76 @@
+# config for RNA-Variant discovery snakemake pipeline #
+
+#PICARD:
+#  "~/src/picard/picard.jar"
+#
+#GATK:
+#  "/cluster/software/modules-sw/GATK/3.8/GenomeAnalysisTK.jar"
+#
+#SNPEFF:
+#  "/beevol/home/riemondy/bin/snpEff"
+#
+#PANDOC:
+#  "/beevol/home/riemondy/bin/pandoc/"
+
+LIB:
+  "./workflow/scripts/"
+
+RAW_DATA:
+    "/beevol/home/riemondy/Projects/vicens/data/2023-02-09/star"
+
+DATA: 
+    "/beevol/home/riemondy/Projects/vicens/data/2023-02-09/hyperediting"
+
+GENOME:
+  "/beevol/home/rbilab/ref/genome/human/GRCh38/dna/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+
+  # path to 3-base bwa indices, will be generated if they do not exist
+BWA_IDX:
+  "/beevol/home/riemondy/Projects/vicens/dbases/hyperediting/bwa_idx"
+
+SIMPLE_REPEATS:
+  "/beevol/home/riemondy/Projects/vicens/dbases/hyperediting/unique_simple_repeats.txt"
+
+# on of fr-first-strand or fr-second-strand
+LIBRARY_TYPE:
+    - "fr-first-strand"
+
+FASTQ:
+    - p150_Dox_24hrs_IFNB/p150_Dox_24hrs_IFNB 
+    - p150_Dox_48hrs_IFNB/p150_Dox_48hrs_IFNB
+    - p150_Dox_IFNB/p150_Dox_IFNB
+
+FASTQ_SUFFIX:
+    R1: "_Unmapped.out.mate1.fastq.gz"
+    R2: "_Unmapped.out.mate2.fastq.gz"
+
+BAM_SUFFIX:
+    "_sorted.bam"
+
+pos_ref:
+  - A
+  - A
+  - A  
+  - G
+  - G
+  - G
+  - C
+  - C
+  - C
+  - T
+  - T
+  - T  
+
+pos_alt: 
+  - G 
+  - C 
+  - T
+  - A
+  - C
+  - T
+  - A
+  - G 
+  - T
+  - A
+  - G
+  - C
