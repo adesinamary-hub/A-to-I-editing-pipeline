@@ -44,7 +44,7 @@ TxDb(Mus.musculus) <- TxDb.Mmusculus.UCSC.mm39.knownGene
 threads <- 24
 theme_set(theme_cowplot())
 
-gtf <- import.gff("/data7/ADAR1_062025_Novogene/04.Ref/genome.gtf.gz")
+gtf <- import.gff("/genome.gtf.gz")
 
 if (!dir.exists("plots")) dir.create("plots")
 ```
