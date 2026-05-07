@@ -1,4 +1,4 @@
-# Quantitative analysis of A-to-I editing in Mouse using raer
+# Quantitative analysis of A-to-I editing in Human using raer
 
 #The BAM files generated from editing and hyperedititng are further anaylzed to quantify A-to-I ediitng represented as A to G mismatches and generate visuals for publication.
  
