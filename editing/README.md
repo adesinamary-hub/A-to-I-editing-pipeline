@@ -1,38 +1,26 @@
-# hyperediting detection pipeline
+# Editing detection pipeline
 
-Hyperedited reads are often overlooked because they fail to align
-to the genome. 
+Quantitative analysis of A-to-I editing first takes into account edited reads that show up as A-to-G mismatches
+This snakemake pipeline will take the raw reads in fastq format, align them and gnerate edited reads in BAM files for futher analysis.
 
-This snakemake pipeline will take unaligned reads in fastq format 
-and identify hyperedited reads.
 
-The required dependencies can be installed as a conda environment
-which will be named `hyperediting`. Alternatively, the required dependencies
-can be installed manually and should work as long as they are found in 
-the PATH. 
+Update config.yaml file with your own file paths, adapter sequences, and output directories 
 
+Update LIB_param.tsv file with appropriate Fastq ID, sample ID, and library type.
+
+Ensure snakemake is installed
 ```bash
-conda env create -f environment.yaml
-```
-
-```bash
-conda activate hyperediting
-```
-
-Edit the config/config_hyperediting.yaml and test the snakemake pipeline
-
-```bash
-snakemake -npr 
+snakemake --help   
 ```
 
 Modify the snakecharmer.sh script depending on your cluster/local setup
-and run the pipeline
 
+Test run to confirm that all file paths are accurate. This would simply run, without executing
 ```bash
-# on a lsf cluster
-bsub < snakecharmer.sh
-
-# on a local run
-bash snakecharmer.sh
+snakemake -n -p
+```
+Run the pipeline 
+```bash
+snakemake -p 
 ```
 
