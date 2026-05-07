@@ -1471,17 +1471,6 @@ plot_editing_heatmap <- function(x, sites, scale = FALSE, ...) {
   Heatmap(ef,...)
 }
 
-
-
-plot_editing_heatmap <- function(x, sites, scale = FALSE, ...) {
-  ef <- assays(x)$edit_freq[sites, ]
-  if(scale) {
-    ef <- t(scale(t(ef)))
-  }
-  colnames(ef) <- colData(x)$condition
-  Heatmap(ef,...)
-}
-
 plot_editing_heatmap <- function(x, sites, scale = FALSE, ...) {
   ef <- assays(x)$edit_freq[sites, ]
   ef[is.infinite(ef)] <- NA
