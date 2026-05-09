@@ -117,9 +117,7 @@ Run the R Markdown workflows in:
 
 ---
 
-# Configuration Notes
-
-Before running the pipeline:
+##  Before running the pipeline:
 
 1. Update sample names and sample groups in the R Markdown scripts.
 2. Define the correct genome FASTA file path.
