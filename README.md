@@ -1,61 +1,155 @@
 # A-to-I RNA Editing Analysis Pipeline
 
-This repository contains a computational pipeline for the detection, quantification, differential analysis, and visualization of A-to-I RNA editing events from RNA-seq datasets in human and mouse samples. The workflow integrates preprocessing, alignment, editing detection, hyperediting analysis, transcript quantification, statistical analysis, and visualization using reproducible scripts written in Snakemake and R Markdown.
+This repository contains a computational workflow for the detection, quantification, annotation, and differential analysis of A-to-I RNA editing events from RNA-seq datasets in both human and mouse samples. The workflow integrates conventional editing detection, hyperediting analysis, transcript quantification, statistical analysis, and visualization using Snakemake workflows and R Markdown scripts.
 
-Overview
+---
 
-##  The pipeline performs:
-1. RNA-seq quality control and adapter trimming
-2. Genome alignment and BAM processing
-3. Detection of edited and hyperedited A-to-I sites
-4. SNP filtering
-5. Annotation of editing sites
-6. Alu Editing Index (AEI) calculation
-7. Differential editing analysis
-8. Visualization of editing patterns and statistical analysis in R
+# Repository Structure
 
-The workflow supports both human and mouse datasets.
+The repository is organized into directories corresponding to different stages of the workflow.
 
-## Repository Structure
-
-├── workflow/                 # Snakemake workflow files
-├── scripts/                  # Custom Python and R scripts
-├── config/                   # Configuration files
-├── notebooks/                # R Markdown analysis files
-├── plots/                    # Output figures
-├── results/                  # Processed results
+```text
+├── editing/
+├── hyperediting/
+├── Rscript_Human/
+├── Rscript_Mouse/
 └── README.md
-
-
-## Requirements
-
-- R (>= 4.0)
-- Python (>= 3.0)
-- Snakemake
-- fastp
-- STAR
-- samtools
-- Salmon
-- BWA
-- Bioconductor packages
-
-
-## Input Files
-
-The pipeline accepts paired-end RNA-seq FASTQ files:
-
-sample_1.fastq.gz
-sample_2.fastq.gz
-
-Additional required files:
-
-- Reference genome FASTA
-- Genome annotation GTF
-- REDIportal annotation database
-- dbSNP BED files
-  
-Update necessary paths and directories in editing and hyperediting configuration files 
-```bash
-#Ensure all files and folder exist in your working directory;
-~/Pipeline
 ```
+
+## Directory Description
+
+### `/editing`
+
+Contains scripts and workflows for preprocessing and detection of conventional A-to-I RNA editing events from mapped RNA-seq reads.
+
+This stage includes:
+
+- adapter trimming
+- quality filtering
+- genome alignment
+- BAM processing
+- SNP filtering
+- editing site detection
+
+---
+
+### `/hyperediting`
+
+Contains scripts and workflows for hyperediting detection using previously unmapped reads.
+
+Because hyperedited reads often fail standard genome alignment, unmapped reads are separately processed to recover highly edited RNA molecules.
+
+This stage includes:
+
+- extraction of unmapped reads
+- hyperediting alignment
+- hyperedited site detection
+- filtering and processing of hyperedited BAM files
+
+---
+
+### `/Rscript_Human`
+
+Contains R Markdown scripts for downstream analysis of human RNA editing datasets.
+
+Analyses include:
+
+- Alu Editing Index (AEI) calculation
+- differential editing analysis 
+- visualization and figure generation
+
+---
+
+### `/Rscript_Mouse`
+
+Contains equivalent R Markdown workflows for mouse datasets.
+
+Mouse-specific analyses include editing quantification within repetitive SINE elements (B1, B2, B4, ID)
+
+
+---
+
+# Workflow Overview
+
+The pipeline should be run in the following order:
+
+---
+
+## Step 1 — Conventional Editing Preprocessing
+
+Run the workflows within the `/editing` directory.
+
+This step processes mapped RNA-seq reads to identify conventional A-to-I editing sites.
+
+
+---
+
+## Step 2 — Hyperediting Preprocessing
+
+Run the workflows within the `/hyperediting` directory.
+
+This step processes previously unmapped reads to recover hyperedited RNA reads that are often missed during standard alignment.
+
+
+---
+
+## Step 3 — Downstream Analysis in R
+
+Run the R Markdown workflows in:
+
+- `/Rscript_Human` for human datasets
+- `/Rscript_Mouse` for mouse datasets
+
+---
+
+# Software Requirements
+
+## Core Software
+
+- R (≥ 4.1)
+- Python (> 3.0)
+- Snakemake
+- STAR
+- Salmon
+- samtools
+- bwa
+- fastp
+
+---
+
+# Configuration Notes
+
+Before running the pipeline:
+
+1. Update sample names and sample groups in the R Markdown scripts.
+2. Define the correct genome FASTA file path.
+3. Specify REDIportal database paths.
+4. Adjust replicate settings based on dataset structure.
+5. Define experimental group comparisons for differential editing analysis.
+
+---
+
+# Output
+
+The pipeline generates:
+
+- filtered editing site tables
+- differential editing results
+- AEI values
+- transcript abundance summaries
+- heatmaps
+- bar plots
+- hyperediting summaries
+- publication-ready figures
+
+---
+
+# Citation
+
+If you use this workflow, please cite the relevant software tools and associated study.
+
+---
+
+# Contact
+
+For questions, suggestions, or collaborations, please open an issue in this repository.
