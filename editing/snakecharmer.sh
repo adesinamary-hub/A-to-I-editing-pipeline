@@ -15,7 +15,7 @@ args='
       -R " {params.memory} span[hosts=1] "
       -n {threads} '
 
-#module load salmon STAR python/3.8.5 samtools 
+module load salmon STAR python/3.8.5 samtools 
 
 snakemake \
     --drmaa "$args" \
