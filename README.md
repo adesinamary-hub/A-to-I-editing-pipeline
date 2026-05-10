@@ -4,18 +4,6 @@ This repository contains a computational workflow for the detection, quantificat
 
 ---
 
-# Repository Structure
-
-The repository is organized into directories corresponding to different stages of the workflow.
-
-```text
-├── editing/
-├── hyperediting/
-├── Rscript_Human/
-├── Rscript_Mouse/
-└── README.md
-```
-
 ## Directory Description
 
 ### `/editing`
@@ -33,7 +21,7 @@ This stage includes:
 
 ---
 
-### `/hyperediting`
+# `/hyperediting`
 
 Contains scripts and workflows for hyperediting detection using previously unmapped reads.
 
@@ -66,30 +54,37 @@ Contains equivalent R Markdown workflows for mouse datasets.
 
 Mouse-specific analyses include editing quantification within repetitive SINE elements (B1, B2, B4, ID)
 
-
 ---
 
 # Workflow Overview
 
 The pipeline should be run in the following order:
 
----
 
-## Step 1 — Conventional Editing Preprocessing
+## Step 1 
 
 Run the workflows within the `/editing` directory.
+1. Update config/config_240404.yaml file
+2. Update config/lib_params_240404.tsv with correct FASTQ ID, sample ID, library type
+3. Ensure snakemake is installed
+```bash
+snakemake --help   
+```
+4. Modify snakecharmer.sh script depending on your cluster/local setup
+5. Test run to confirm that all file paths are accurate. This would simply run, without executing
+```bash
+snakemake -n -p
+```
+6. Run the pipeline 
+```bash
+snakemake -p 
+```
 
-This step processes mapped RNA-seq reads to identify conventional A-to-I editing sites.
 
-
----
-
-## Step 2 — Hyperediting Preprocessing
+## Step 2
 
 Run the workflows within the `/hyperediting` directory.
-
-This step processes previously unmapped reads to recover hyperedited RNA reads that are often missed during standard alignment.
-
+1. 
 
 ---
 
@@ -101,6 +96,13 @@ Run the R Markdown workflows in:
 - `/Rscript_Mouse` for mouse datasets
 
 ---
+
+
+
+
+
+
+
 
 # Software Requirements
 
@@ -114,52 +116,6 @@ Run the R Markdown workflows in:
 - samtools
 - bwa
 - fastp
-
----
-
-#  Editing 
-#### Update configuration YAML file
-
-Modify:
-
-```text
-config/config_240404.yaml
-```
-
-#### Update library parameter file with correct FASTQ ID, sample ID, library type
-
-Modify:
-
-```text
-config/lib_params_240404.tsv
-```
-
-Ensure snakemake is installed
-```bash
-snakemake --help   
-```
-
-Modify the snakecharmer.sh script depending on your cluster/local setup
-
-Test run to confirm that all file paths are accurate. This would simply run, without executing
-```bash
-snakemake -n -p
-```
-Run the pipeline 
-```bash
-snakemake -p 
-```
-
-
-
-
-
-
-
-# Citation
-
-If you use this workflow, please cite the relevant software tools and associated study.
-
 ---
 
 # Contact
