@@ -117,30 +117,44 @@ Run the R Markdown workflows in:
 
 ---
 
-##  Before running the pipeline:
+#  Editing 
+#### Update configuration YAML file
 
-1. Update sample names and sample groups in the R Markdown scripts.
-2. Define the correct genome FASTA file path.
-3. Specify REDIportal database paths.
-4. Adjust replicate settings based on dataset structure.
-5. Define experimental group comparisons for differential editing analysis.
+Modify:
 
----
+```text
+config/config_240404.yaml
+```
 
-# Output
+#### Update library parameter file with correct FASTQ ID, sample ID, library type
 
-The pipeline generates:
+Modify:
 
-- filtered editing site tables
-- differential editing results
-- AEI values
-- transcript abundance summaries
-- heatmaps
-- bar plots
-- hyperediting summaries
-- publication-ready figures
+```text
+config/lib_params_240404.tsv
+```
 
----
+Ensure snakemake is installed
+```bash
+snakemake --help   
+```
+
+Modify the snakecharmer.sh script depending on your cluster/local setup
+
+Test run to confirm that all file paths are accurate. This would simply run, without executing
+```bash
+snakemake -n -p
+```
+Run the pipeline 
+```bash
+snakemake -p 
+```
+
+
+
+
+
+
 
 # Citation
 
