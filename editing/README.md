@@ -4,9 +4,9 @@ Quantitative analysis of A-to-I editing first takes into account edited reads th
 This snakemake pipeline will take the raw reads in fastq format, align them and gnerate edited reads in BAM files for futher analysis.
 
 
-Update config.yaml file with your own file paths, adapter sequences, and output directories 
+Update config/config_240404.yaml file with your own file paths, adapter sequences, and output directories 
 
-Update LIB_param.tsv file with appropriate Fastq ID, sample ID, and library type.
+Update config/lib_params_240404.tsv file with appropriate Fastq ID, sample ID, and library type.
 
 Ensure snakemake is installed
 ```bash
