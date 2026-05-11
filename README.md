@@ -134,6 +134,7 @@ nohup Rscript -e "rmarkdown::render('AEI_analysis_Mouse.Rmd')" > analysis.log 2>
 
 #File naming
 condition /sample group name should follow this order; condition, "_", number (0-10) 
+
 e.g - `Wildtype_1`, `KO_1`, `Negative_ctrl_1`
 
 
