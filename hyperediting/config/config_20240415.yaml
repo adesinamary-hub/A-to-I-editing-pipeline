@@ -22,7 +22,7 @@ SIMPLE_REPEATS:
 # strand-specific information of sequenced data; fr-first-strand or fr-second-strand
 LIBRARY_TYPE:
     - "fr-first-strand"
-# condition/group name prefix
+# condition/group name prefix (conditions are in triplicates)
 FASTQ:
   - ADAR1_KO_A/ADAR1_KO_A
   - ADAR1_KO_B/ADAR1_KO_B
