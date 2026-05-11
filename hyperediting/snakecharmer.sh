@@ -16,7 +16,7 @@ args='
   -n {threads}
   '
 
-
+#Ignore
 #snakemake --drmaa "$args" \
 #    --snakefile workflow/Snakefile \
 #    --jobs 100 \
@@ -26,6 +26,7 @@ args='
 #    --rerun-incomplete \
 #    --configfile config/config_hyperediting.yaml
 
+#Ignore
 #snakemake --drmaa "$args" \
 #    --snakefile workflow/Snakefile \
 #    --jobs 200 \
