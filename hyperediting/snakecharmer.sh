@@ -37,6 +37,7 @@ args='
 #    --scheduler greedy \
 #    --configfile config/config_20231220.yaml 
 
+# relevant command
 snakemake --drmaa "$args" \
     --snakefile workflow/Snakefile \
     --jobs 200 \
