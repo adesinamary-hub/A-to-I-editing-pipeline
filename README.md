@@ -119,7 +119,8 @@ bash snakecharmer.sh
 
 ## Step 3 — Downstream Analysis in R
 
-Run the R Markdown workflows in:
+1. Update condition name and file paths in script
+2. Run the R Markdown workflows in:
 
 - `/Rscript_Human` for human datasets
 - `/Rscript_Mouse` for mouse datasets
@@ -132,7 +133,7 @@ nohup Rscript -e "rmarkdown::render('AEI_analysis_Mouse.Rmd')" > analysis.log 2>
 
 
 
-#File naming
+###   File naming
 condition /sample group name should follow this order; condition, "_", number (0-10) 
 
 e.g - `Wildtype_1`, `KO_1`, `Negative_ctrl_1`
@@ -144,8 +145,8 @@ e.g - `Wildtype_1`, `KO_1`, `Negative_ctrl_1`
 
 ## Core Software
 
-- R (≥ 4.1)
-- Python (> 3.0)
+- R (≥ 4.2)
+- Python (> 3.1)
 - Snakemake
 - STAR
 - Salmon
@@ -153,7 +154,3 @@ e.g - `Wildtype_1`, `KO_1`, `Negative_ctrl_1`
 - bwa
 - fastp
 ---
-
-# Contact
-
-For questions, suggestions, or collaborations, please open an issue in this repository.
