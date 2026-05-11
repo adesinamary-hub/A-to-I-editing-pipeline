@@ -140,17 +140,17 @@ e.g - `Wildtype_1`, `KO_1`, `Negative_ctrl_1`
 
 
 
+## Software Requirements
 
-# Software Requirements
+#### Core Software
 
-## Core Software
-
-- R (≥ 4.2)
-- Python (> 3.1)
-- Snakemake
-- STAR
-- Salmon
-- samtools
-- bwa
-- fastp
+- R (≥ 4.4)
+- Python (≥ 3.12.0)
+- snakemake (≥ 9.5.1)
+- cutadapt (≥ 1.8.3)
+- STAR (≥ 2.7.11)
+- salmon (≥ 1.10.1)
+- samtools (≥ 1.21)
+- bwa (≥ 0.7.19)
+- fastp (≥ 1.0.1)
 ---
