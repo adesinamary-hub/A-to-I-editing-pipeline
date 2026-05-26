@@ -1,88 +1,49 @@
 # config for RNA-Variant discovery snakemake pipeline #
 #path to scripts directory
 LIB:
-  "./workflow/scripts/"
+  "/home/Mary/RNA_Seq_Analysis/KENT_Code/pipeline/hyperediting/workflow/scripts/"
 #path to raw FASTQ files
 RAW_DATA:
-    "/beevol/home/riemondy/Projects/vicens/data/2024-04-04/star"
+    "/data7/Chung_H_et_al/2024-04-04/star/"
 #directory where output files will be stored
-DATA: 
-    "/beevol/home/riemondy/Projects/vicens/data/2024-04-04/hyperediting"
-#path to indexed reference genome 
+DATA:
+    "/data7/Chung_H_et_al/2024-04-04/hyperediting"
+#path to indexed reference genome
 GENOME:
-  "/beevol/home/rbilab/ref/genome/human/GRCh38/dna/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+  "/data7/genome_Hg38/GRCh38.primary_assembly.genome.fa"
 
- # path to 3-base bwa indices, will be generated if they do not exist
+# path to 3-base bwa indices, will be generated if they do not exist
 BWA_IDX:
-  "/beevol/home/riemondy/Projects/vicens/dbases/hyperediting/bwa_idx"
+  "/home/Mary/RNA_Seq_Analysis/KENT_Code/pipeline/hyperediting_Chung/bwa_idx"
 #path to simple repeat file in /hyperediting/dbases directory, can be commented
 SIMPLE_REPEATS:
-  "/beevol/home/riemondy/Projects/vicens/dbases/hyperediting/unique_simple_repeats.txt"
+  "/data7/KENT_code/dbases/hyperediting/unique_simple_repeats.txt"
 
 # strand-specific information of sequenced data; fr-first-strand or fr-second-strand
 LIBRARY_TYPE:
     - "fr-first-strand"
 # condition/group name prefix (conditions are in triplicates)
 FASTQ:
-  - ADAR1_KO_A/ADAR1_KO_A
-  - ADAR1_KO_B/ADAR1_KO_B
-  - ADAR1_KO_C/ADAR1_KO_C
-  - ADAR1_KO_H910Q_E912A_A/ADAR1_KO_H910Q_E912A_A
-  - ADAR1_KO_H910Q_E912A_B/ADAR1_KO_H910Q_E912A_B
-  - ADAR1_KO_H910Q_E912A_C/ADAR1_KO_H910Q_E912A_C
-  - ADAR1_KO_p150_minus_DOX_A/ADAR1_KO_p150_minus_DOX_A
-  - ADAR1_KO_p150_minus_DOX_B/ADAR1_KO_p150_minus_DOX_B
-  - ADAR1_KO_p150_minus_DOX_C/ADAR1_KO_p150_minus_DOX_C
-  - ADAR1_KO_p150_plus_DOX_A/ADAR1_KO_p150_plus_DOX_A
-  - ADAR1_KO_p150_plus_DOX_B/ADAR1_KO_p150_plus_DOX_B
-  - ADAR1_KO_p150_plus_DOX_C/ADAR1_KO_p150_plus_DOX_C
-  - ADAR1p150_KO_A/ADAR1p150_KO_A
-  - ADAR1p150_KO_B/ADAR1p150_KO_B
-  - ADAR1p150_KO_C/ADAR1p150_KO_C
-  - H910Q_E912A_A/H910Q_E912A_A
-  - H910Q_E912A_B/H910Q_E912A_B
-  - H910Q_E912A_C/H910Q_E912A_C
-  - N173A_Y177A_A/N173A_Y177A_A
-  - N173A_Y177A_B/N173A_Y177A_B
-  - N173A_Y177A_C/N173A_Y177A_C
-  - N173S_A/N173S_A
-  - N173S_B/N173S_B
-  - N173S_C/N173S_C
-  - P193A_A/P193A_A
-  - P193A_B/P193A_B
-  - P193A_C/P193A_C
-  - deltaZalpha_A/deltaZalpha_A
-  - deltaZalpha_B/deltaZalpha_B
-  - deltaZalpha_C/deltaZalpha_C
-  - deltaZbeta_A/deltaZbeta_A
-  - deltaZbeta_B/deltaZbeta_B
-  - deltaZbeta_C/deltaZbeta_C
-  - delta_one_A/delta_one_A
-  - delta_one_B/delta_one_B
-  - delta_one_C/delta_one_C
-  - double_A/double_A
-  - double_B/double_B
-  - double_C/double_C
-  - p150_minus_DOX_A/p150_minus_DOX_A
-  - p150_minus_DOX_B/p150_minus_DOX_B
-  - p150_minus_DOX_C/p150_minus_DOX_C
-  - p150_plus_DOX_1mg_A/p150_plus_DOX_1mg_A
-  - p150_plus_DOX_1mg_B/p150_plus_DOX_1mg_B
-  - p150_plus_DOX_1mg_C/p150_plus_DOX_1mg_C
-  - p150_plus_DOX_A/p150_plus_DOX_A
-  - p150_plus_DOX_B/p150_plus_DOX_B
-  - p150_plus_DOX_C/p150_plus_DOX_C
-  - wild-type_minus_IFNb_A/wild-type_minus_IFNb_A
-  - wild-type_minus_IFNb_B/wild-type_minus_IFNb_B
-  - wild-type_minus_IFNb_C/wild-type_minus_IFNb_C
-  - wild-type_plus_IFNb_A/wild-type_plus_IFNb_A
-  - wild-type_plus_IFNb_B/wild-type_plus_IFNb_B
-  - wild-type_plus_IFNb_C/wild-type_plus_IFNb_C
-  - wild-type_plus_IFNb_plus_DOX_A/wild-type_plus_IFNb_plus_DOX_A
-  - wild-type_plus_IFNb_plus_DOX_B/wild-type_plus_IFNb_plus_DOX_B
-  - wild-type_plus_IFNb_plus_DOX_C/wild-type_plus_IFNb_plus_DOX_C
+  - ADAR1_KO_1/ADAR1_KO_1
+  - ADAR1_KO_2/ADAR1_KO_2
+  - ADAR1_KO_3/ADAR1_KO_3
+  - ADAR1_KO_Interferon_1/ADAR1_KO_Interferon_1
+  - ADAR1_KO_Interferon_2/ADAR1_KO_Interferon_2
+  - ADAR1_KO_Interferon_3/ADAR1_KO_Interferon_3
+  - ADAR1p150_KO_1/ADAR1p150_KO_1
+  - ADAR1p150_KO_2/ADAR1p150_KO_2
+  - ADAR1p150_KO_3/ADAR1p150_KO_3
+  - ADAR1p150_KO_Interferon_1/ADAR1p150_KO_Interferon_1
+  - ADAR1p150_KO_Interferon_2/ADAR1p150_KO_Interferon_2
+  - ADAR1p150_KO_Interferon_3/ADAR1p150_KO_Interferon_3
+  - wildtype_1/wildtype_1
+  - wildtype_2/wildtype_2
+  - wildtype_3/wildtype_3
+  - wildtype_Interferon_1/wildtype_Interferon_1
+  - wildtype_Interferon_2/wildtype_Interferon_2
+  - wildtype_Interferon_3/wildtype_Interferon_3
 
-# BAM filename suffixes generated after editing preprocessing
+# BAM filename suffixes generated after editing preprocessing; found in 'DATA' directory
 FASTQ_SUFFIX:
     R1: "_Unmapped.out.mate1.fastq.gz"
     R2: "_Unmapped.out.mate2.fastq.gz"
@@ -93,7 +54,7 @@ BAM_SUFFIX:
 pos_ref:
   - A
   - A
-  - A  
+  - A
   - G
   - G
   - G
@@ -102,18 +63,19 @@ pos_ref:
   - C
   - T
   - T
-  - T  
+  - T
 
-pos_alt: 
-  - G 
-  - C 
+pos_alt:
+  - G
+  - C
   - T
   - A
   - C
   - T
   - A
-  - G 
+  - G
   - T
   - A
   - G
   - C
+
