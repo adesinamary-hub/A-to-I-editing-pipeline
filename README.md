@@ -131,7 +131,7 @@ bash snakecharmer.sh
 - `/Rscript_Mouse` for mouse datasets
 
 ```bash
-#Run on R studio or local run
+#Run on R studio or local run, this generates a log file
 nohup Rscript -e "rmarkdown::render('initial_analysis_mouse.Rmd')" > analysis.log 2>&1 &
 ```
 ---
