@@ -106,7 +106,7 @@ conda activate hyperediting3
 ```
 Test the snakemake pipeline
 ```bash
-snakemake -npr 
+snakemake -n -p 
 ```
 
 Modify #relevant command in snakecharmer.sh script depending on your cluster/local setup
