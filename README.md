@@ -79,31 +79,30 @@ cd  ..
 ```bash
 snakemake -n -p
 ```
+![Project Logo](images/snakemake_prerun_editing "output")   
 
 6. Run 
 ```bash
 snakemake -p 
 ```
 
-
 ## Step 2
 
 Run the workflows within the `/hyperediting` directory.
 
 1. Update config/config_20240415.yaml file
-2. Update config/lib_params_240404.tsv with correct FASTQ ID, sample ID, library type
-3. Install Required dependencies
-   The required dependencies can be installed as a conda environment
-which will be named `hyperediting`. Alternatively, the required dependencies
+2. Install Required dependencies
+   The required dependencies are specified in environment2.yaml, and can be installed as a conda environment
+which will be named `hyperediting3`. Alternatively, the required dependencies
 can be installed manually and should work as long as they are found in 
 the PATH.
 
 ```bash
-conda env create -f environment.yaml
+conda env create -f environment2.yaml
 ```
 
 ```bash
-conda activate hyperediting
+conda activate hyperediting3
 ```
 Test the snakemake pipeline
 ```bash
