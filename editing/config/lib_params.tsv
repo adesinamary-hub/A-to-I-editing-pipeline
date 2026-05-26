@@ -1,5 +1,0 @@
-fastq_id    sample_id   lib_type
-ADAR1_KO_HEK293T_ADAR1p150minusEGFPminu3xFLAGplusIFNB   p150minusIFNB   fr-secondstrand
-ADAR1_KO_HEK293T_ADAR1p150plusIFNB  p150IFNB    fr-secondstrand
-MocktransfectionplusIFNB    Mock    fr-secondstrand
-#SRR629569_70   HEK293  fr-firststrand
