@@ -108,6 +108,7 @@ Test the snakemake pipeline
 ```bash
 snakemake -n -p 
 ```
+![Project Logo](images/snakemake_prerun_HE "output") 
 
 Modify #relevant command in snakecharmer.sh script depending on your cluster/local setup
 and run the pipeline
