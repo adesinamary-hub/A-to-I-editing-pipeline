@@ -124,15 +124,15 @@ bash snakecharmer.sh
 
 ## Step 3 — Downstream Analysis in R
 
-1. Update condition name and file paths in script
-2. Run the R Markdown workflows in:
+1. Update sample ID and file paths in script
+2. Run the Markdown file in:
 
 - `/Rscript_Human` for human datasets
 - `/Rscript_Mouse` for mouse datasets
 
 ```bash
 #Run on R studio or local run
-nohup Rscript -e "rmarkdown::render('AEI_analysis_Mouse.Rmd')" > analysis.log 2>&1 &
+nohup Rscript -e "rmarkdown::render('initial_analysis_mouse.Rmd')" > analysis.log 2>&1 &
 ```
 ---
 
