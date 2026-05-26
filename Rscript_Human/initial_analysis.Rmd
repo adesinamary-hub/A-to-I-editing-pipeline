@@ -1,5 +1,6 @@
 ---
-title: "AEDITscape_Nichols et al"
+title: "Investigating the function of ADAR1 Z-alpha domain in A-to-I RNA editing"
+author: "Kent Riemondy RBI"
 output:
   html_document:
     toc: true
@@ -16,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE,
                       message = FALSE)
 ```
-#install libraries
+
 ```{r}
 library(here)
 library(ggplot2)
@@ -41,13 +42,11 @@ TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
 
 threads <- 24
 theme_set(theme_cowplot())
-
-#update sample ID
 gtf <- import.gff("/data7/genome_Hg38/GRCh38.primary_assembly.gtf.gz")
 ```
 
-# update sample_order, subset_to_plot, and subset_nice_labels to match your sample ID
 ```{r}
+# Update sample_id 
 sample_order <- c("wild-type_minus_IFNb",
                   "wild-type_plus_IFNb",
                   "wild-type_plus_IFNb_plus_DOX",
@@ -93,20 +92,46 @@ subset_nice_labels <- c("Wildtype",
                         "H910Q_E912A")
 
 
+#### uncomment either 1, 2 or 3 based on your dataset
+#1. for samples with equal replacates e.g three samples per group
+#samples <- paste0(rep(sample_order, each = 3), "_", c("1", "2", "3"))
+
+#2. if alphabeth suffix is used
 samples <- paste0(rep(sample_order, each = 3), "_", c("A", "B", "C"))
 
-sample_info <- data.frame(sample_id = factor(samples, levels = samples),
-                          bam_fn = here("data", 
-                                        "2024-04-04", 
-                                        "star",
-                                        samples,
-                                        paste0(samples,
-                                               "_dedup_sorted.bam")),
-                          salmon_fn = here("data", 
-                                        "2024-04-04", 
-                                        "salmon",
-                                        samples,
-                                        "quant.sf"))
+#3. for samples with unequal replictes eg three ADAR1p110_replica, three ADAR1p150_replica and two RFP_editase_neg_ctrl
+#rep_counts <- c(3, 3, 1)
+#samples <- unlist(
+#  mapply(function(s, n) paste0(s, "_", seq_len(n)),
+#         sample_order,
+#         rep_counts,
+#         SIMPLIFY = FALSE)
+#)
+
+sample_info <- data.frame(sample_id = factor(samples, levels = samples), 
+ # path to star output in 'DATA'
+  bam_fn = file.path("/data7/data_Mary3/2024-04-04/star",  
+
+                     samples,  
+
+                     paste0(samples, "_dedup_sorted.bam")), 
+# path to salmon output in 'DATA'
+            salmon_fn = file.path("/data7/data_Mary3/2024-04-04/salmon",  
+
+                        samples,  
+
+                        "quant.sf")) 
+
+missing_salmon <- sample_info$salmon_fn[!file.exists(sample_info$salmon_fn)] 
+
+missing_bam <- sample_info$bam_fn[!file.exists(sample_info$bam_fn)] 
+
+  
+
+missing_salmon 
+
+missing_bam 
+
 
 stopifnot(all(file.exists(sample_info$salmon_fn)))
 ```
@@ -129,8 +154,6 @@ genes <- tx2gene$gene_name[match(rownames(salmon_tx$abundance),
 genes[is.na(genes)] <-  rownames(salmon_tx$abundance)[is.na(genes)]
 
 adar_tx <- rownames(salmon_tx$abundance)[genes == "ADAR"]
-
-#Include the last 10 genes (ADAR MUTANT TRANSGENES)
 adar_tx <- c(adar_tx, tail(rownames(salmon_tx$abundance), 10))
 
 tpms <- salmon_tx$abundance
@@ -188,11 +211,11 @@ Heatmap(log2(tpm_mat + 1)[, samples],
 For reference here is a map of the annotated ADAR1 transcripts. 
 
 ```{r}
-library(ggbio)
-adar_annot <- gtf[gtf$gene_name == "ADAR", ]
-adar_annot <- gtf[ sub("\\.[0-9]+$", "",gtf$transcript_id) %in% adar_tx]
-adar_annot <- split(adar_annot, adar_annot$transcript_id)
-autoplot(adar_annot, gap.geom = "chevron")
+#library(ggbio)
+#adar_annot <- gtf[gtf$gene_name == "ADAR", ]
+#adar_annot <- gtf[ sub("\\.[0-9]+$", "",gtf$transcript_id) %in% adar_tx]
+#adar_annot <- split(adar_annot, adar_annot$transcript_id)
+#autoplot(adar_annot, gap.geom = "chevron")
 ```
 
 
@@ -260,11 +283,17 @@ plot_counts <- function(dds, gene) {
 }
 ```
 
-```{r, fig.width = 6, fig.height = 24}
-plts <- lapply(c("IFNB1", "ISG15", "IFIT2", "IFIH1", "DDX58", "OAS2"),
+```{r, fig.width = 6, fig.height = 60}
+plts <- lapply(c("IFNB1", "ISG15", "IFIT2", "IFIH1", "RIGI", "DDX39B", "OAS2", "IFNA2", "IFNAR1", "IFNAR2", "ZBP1", "ADAR", "ADARB1", "ADARB2", "EIF2AK2"),
        plot_counts, dds = dds)
-plot_grid(plotlist = plts, ncol = 1, nrow = 6)
 
+genes_plot <- plot_grid(plotlist = plts, ncol = 1, nrow = 15)
+
+pdf("plots/chk9.pdf", width = 6, height = 40)
+print(genes_plot)  
+dev.off()
+
+plot_grid(plotlist = plts, ncol = 1, nrow = 15)
 ```
 
 ```{r, eval = FALSE}
@@ -306,7 +335,7 @@ Next I will examine A-to-I editing sites. Sites from the rediportal database wil
 ```{r}
 
 
-fafn <- here("dbases/seqs/genome/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa")
+fafn <- here("/data7/genome_Hg38/GRCh38.primary_assembly.genome.fa")
 
 outfn_se <- "rediportal_rse.rds"
 
@@ -352,13 +381,13 @@ if(!file.exists("aei_vals.rds")) {
   if(!file.exists("rmsk_hg38.rds")){
     library(AnnotationHub)
     ah <- AnnotationHub()
-    rmsk_hg38 <- ah[["AH99003"]] #UCSC RepeatMasker annotations (Sep2021) for Human (hg38)
+    rmsk_hg38 <- ah[["AH99003"]]
     saveRDS(rmsk_hg38, "rmsk_hg38.rds")
   } else {
     rmsk_hg38 <- readRDS("rmsk_hg38.rds")
   }
   
-  fafn <- here("dbases/seqs/genome/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa")
+  fafn <- here("/data7/genome_Hg38/GRCh38.primary_assembly.genome.fa")
   
   alus <- rmsk_hg38[rmsk_hg38$repFamily == "Alu"]
   alus <- keepStandardChromosomes(alus, pruning.mode = "coarse")
@@ -404,6 +433,24 @@ if(!file.exists("aei_vals.rds")) {
   aei_vals <- readRDS("aei_vals.rds")
 }
 
+head(aei_vals[[1]])  
+
+```
+
+
+```{r}
+#extract A-G editing values per chromosome
+library(dplyr)
+library(tidyr)
+library(writexl)
+
+df <- aei_vals$AEI_per_chrom
+df_ag <- df %>%
+  filter(allele == "A_G")
+df_wide <- df_ag %>%
+  select(bam_file, chrom, prop) %>%
+  pivot_wider(names_from = chrom, values_from = prop)
+write_xlsx(df_wide, "AEI_AtoG_per_chromosome_per_sample.xlsx")
 ```
 
 ```{r, fig.width = 8, fig.height = 12, fig.cap = "Shown are the number of editing sites from REDIPORTAL that are detected (>= 1 read supporting site) in each sample. The data shown in the left panel are normalized to account for the number of sequencing reads in each sample, whereas the panel on the right shows the unnormalized number of sites."}
@@ -426,28 +473,60 @@ vdf$norm_n_sites <- 10e6 * vdf$n_sites / vdf$n_reads
 vdf$sites_per_million <- 1e6 * vdf$n_sites / vdf$n_reads
 ```
 
-```{r eval = FALSE}
+
+```{r, fig.height= 16, fig.width= 20}
 pa <- ggplot(vdf, aes(forcats::fct_rev(variable), sites_per_million)) + 
-  geom_col() +
-  coord_flip() +
+geom_col(fill = "navy") +  coord_flip() +
   labs(
     x = NULL,
     y = "# of editing sites\n(per million reads)")
 
-pb <- ggplot(vdf, aes(forcats::fct_rev(variable), n_sites)) + 
-  geom_col() +
+
+pv <- ggplot(vdf, aes(forcats::fct_rev(variable), n_sites)) +
+  geom_col(fill = "navy") +
   coord_flip() +
   labs(
     x = NULL,
-    y = "Total # of editing sites")
-plot_grid(pa, pb)
+    y = "Total # of editing sites") +
+    theme(
+    axis.title.y = element_text(size = 18),
+    axis.title.x = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+pl <- ggplot(vdf, aes(forcats::fct_rev(variable), norm_n_sites)) + 
+  geom_col(fill = "navy") +
+  coord_flip() +
+  labs(
+    x = NULL,
+    y = "Total # of editing sites") +
+    theme(
+    axis.title.y = element_text(size = 18),
+    axis.title.x = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+
+grid_plot <- plot_grid(pa, pv, pl, 
+	  #labels = c("A", "B"), 
+          align="v",
+          rel_widths = c(6),
+          rel_heights = c(30),
+          nrow = 3)
+
+ggsave("plots/chk15_0).pdf", plot = grid_plot, width = 20, height = 30, units = "in")
+
+pa
+pv
+pl
+
 ```
 
 
 ```{r}
 vdf$condition <-  factor(sub("_[ABC]$", "", as.character(vdf$variable)), levels = sample_order)
 
-ggplot(vdf, aes(forcats::fct_rev(condition), sites_per_million)) + 
+p <- ggplot(vdf, aes(forcats::fct_rev(condition), sites_per_million)) + 
   geom_jitter(width = 0.2) +
     stat_summary(
     fun.y = "mean",
@@ -460,7 +539,7 @@ ggplot(vdf, aes(forcats::fct_rev(condition), sites_per_million)) +
     x = NULL,
     y = "# of editing sites\n(per million reads)")
 
-ggplot(vdf[condition %in% subset_to_plot], aes(condition, sites_per_million)) + 
+pp <- ggplot(vdf[condition %in% subset_to_plot], aes(condition, sites_per_million)) + 
   geom_jitter(width = 0.2) +
     stat_summary(
     fun.y = "mean",
@@ -472,6 +551,39 @@ ggplot(vdf[condition %in% subset_to_plot], aes(condition, sites_per_million)) +
     x = NULL,
     y = "# of editing sites\n(per million reads)") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+
+pr <- ggplot(vdf[condition %in% subset_to_plot], aes(condition, norm_n_sites)) + 
+  geom_jitter(width = 0.2) +
+    stat_summary(
+    fun.y = "mean",
+    col = "red",
+    size = 0.2,
+    shape = 3
+  ) + 
+  labs(
+    x = NULL,
+    y = "Total # of editing sites") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+p
+pp
+pr
+
+save_plot("plots/chk15_1.pdf", p, base_asp = 1, base_height = 6)
+save_plot("plots/chk15_2.pdf", pp, base_asp = 1, base_height = 4)
+save_plot("plots/chk15_3.pdf", pr, base_asp = 1, base_height = 4)
+
+```
+
+```{r, eval = FALSE, fig.cap="Editing frequency (# of edited reads / total reads) of REDIPORTAL sites across each sample."}
+rse02 <- calc_edit_frequency(rse,
+    edit_from = "A",
+    edit_to = "G",
+    drop = TRUE
+)
+
+rse02
 ```
 
 ```{r, eval = FALSE, fig.cap="Editing frequency (# of edited reads / total reads) of REDIPORTAL sites across each sample."}
@@ -483,15 +595,19 @@ plt_dat <- cbind(id = rownames(plt_dat), plt_dat ) |>
 plt_dat$variable <- factor(plt_dat$variable, levels = levels(sample_info$sample_id))
 plt_dat$condition <-  factor(sub("_[ABC]$", "", as.character(plt_dat$variable)), levels = sample_order)
 
-ggplot(plt_dat, aes(variable, value)) + 
+N <- ggplot(plt_dat, aes(variable, value)) + 
   geom_boxplot(width = 0.2,
                fill="white",
                outlier.shape = NA)  +
   labs(x = NULL,
        y = "Editing frequency") +
-  theme(axis.text.x` = element_text(angle = 90, 
+  theme(axis.text.x = element_text(angle = 90, 
                                    hjust = 1, 
                                    vjust = 0.5))
+
+save_plot("plots/Editing frequency.pdf", N, base_asp = 1, base_height = 4)
+
+N
 
 ```
 
@@ -505,6 +621,7 @@ edit_idx <- data.frame(sample_id = factor(names(edit_idx),
                        edit_idx = edit_idx)
 edit_idx$condition <-  factor(sub("_[ABC]$", "", as.character(edit_idx$sample_id)), levels = sample_order)
 
+edit_idx
 ```
 
 ```{r, eval = FALSE}
@@ -521,6 +638,49 @@ pa <- ggplot(edit_idx, aes(condition, edit_idx)) +
     y = "Editing index (based on Rediportal sites)") +
   theme(axis.text.x =element_text(angle = 90, hjust = 1, vjust = 0.5))
 pa
+save_plot("plots/chk19.pdf", pa, base_asp = 1, base_width = 4)
+
+```
+
+```{r, fig.height = 25, fig.width = 10}
+#ggplot of log-transformed editing index (edit_idx)
+library(ggplot2)
+library(ggpubr)
+
+A <- ggplot(edit_idx, aes(x = condition, y = edit_idx)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  theme_bw() +
+  labs(y = "Editing Index", x = "Condition")
+
+B <- ggplot(edit_idx, aes(x = condition, y = abs(log2(edit_idx)))) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  theme_bw() +
+  labs(y = "Abs.Log2 Editing Index", x = "Condition")
+
+C <- ggplot(edit_idx, aes(x = condition, y = log2(edit_idx))) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  theme_bw()+
+  labs(y = "Log2 Editing Index", x = "Condition")
+
+
+grid_plot <- plot_grid(A, B, C,  
+          labels = c('A', 'B', 'C'),
+          align="v",
+          rel_widths = c(6),
+          rel_heights = c(20),
+          nrow = 6)
+ggsave("plots/chk20.pdf", plot = grid_plot, width = 12, height = 20, units = "in")
+
+
+plot_grid(A, B, C,   
+          labels = c('A', 'B', 'C'),
+          align="v",
+          rel_widths = c(6),
+          rel_heights = c(30),
+          nrow = 6)
 ```
 
 ```{r}
@@ -537,15 +697,13 @@ p <- ggplot(edit_idx[edit_idx$condition %in% subset_to_plot,  ], aes(condition, 
     y = "Editing index (REDIportal)") +
   theme(axis.text.x =element_text(angle = 90, hjust = 1, vjust = 0.5))
 
+save_plot("plots/chk21.pdf", p, base_asp = 1, base_height = 4)
 
 p
-save_plot("plots/rediportal.pdf", p, base_asp = 1, base_height = 4)
-
 ```
 
 
 ```{r, fig.height = 8, fig.width = 8, fig.cap="The ALU editing index (AEI) is a measure of the amount of editing occurring at ALU elements. It tends to be a more robust measure of editing than using the editing frequency of known sites. Higher values indicate more editing, and can be interpreted as a weighted average of the percent of edited bases in ALU repeats"}
-
 library(ggrepel)
 aei_vals_plt <- as.data.table(aei_vals$AEI)
 aei_vals_plt$sample_id <- factor(rownames(aei_vals$AEI), levels = levels(sample_info$sample_id))
@@ -561,12 +719,42 @@ aei_vals_plt$condition <- sub("_[ABC]$", "", as.character(aei_vals_plt$sample_id
 aei_vals_plt$condition <- factor(aei_vals_plt$condition, levels = sample_order)
 
 
-ggplot(aei_vals_plt, aes(forcats::fct_rev(condition), value)) +
+p <- ggplot(aei_vals_plt, aes(forcats::fct_rev(condition), value)) +
   geom_jitter() +
   coord_flip() + 
   labs(x = NULL,
        y = "Editing index (AEI)") + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+save_plot("plots/chk22_1.pdf", p, base_asp = 1, base_width = 4)
+p
+
+pv <- ggplot(aei_vals_plt, aes(forcats::fct_rev(condition), value)) +
+  geom_jitter() +
+  stat_summary(
+    fun.y = "mean",
+    col = "red",
+    size = 0.2,
+    shape = 3
+  ) + 
+  coord_flip() + 
+  labs(x = NULL,
+       y = "Editing index (AEI)") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+save_plot("plots/chk22_2.pdf", pv, base_asp = 1, base_width = 4)
+pv
+
+
+C <- ggplot(aei_vals_plt, aes(forcats::fct_rev(condition), x = condition, y = log2(value))) +
+  geom_jitter() +
+  coord_flip() + 
+  labs(x = NULL,
+       y = "log2(Editing Frequency + 1)") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+save_plot("plots/chk22_3.pdf", C, base_asp = 1, base_height = 4)
+C
+
+aei_vals_plt
 ```
 
 ```{r}
@@ -583,24 +771,97 @@ p <- ggplot(aei_vals_plt[aei_vals_plt$condition %in% subset_to_plot], aes(condit
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 p
-save_plot("plots/aei.pdf", p, base_asp = 1, base_height = 4)
+save_plot("plots/chk23_1.pdf", p, base_asp = 1, base_height = 4)
+
+p <- ggplot(aei_vals_plt[aei_vals_plt$condition %in% subset_to_plot], aes(condition, log2(value))) +
+  geom_jitter(width = 0.1) +
+    stat_summary(
+    fun.y = "mean",
+    col = "red",
+    size = 0.2,
+    shape = 3
+  ) + 
+  labs(x = NULL,
+       y = "log2(Editing index (AEI))") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+p
+save_plot("plots/chk23_2.pdf", p, base_asp = 1, base_height = 4)
 ```
 
 ```{r, fig.height = 8, fig.width = 12, fig.cap="The AEI, as shown above, but also plotting other types of mismatches (which shouldn't have signal)"}
-Heatmap(aei_vals$AEI, 
+
+# Peek at the first element
+head(aei_vals[[1]])    
+
+# Summary across all samples
+sum(sapply(aei_vals, nrow))   # total sites detected
+
+y <- Heatmap(aei_vals$AEI, 
          name = "Editing index (AEI)",
          cluster_rows = FALSE,
          row_names_side = "left",
          col = viridis(100),
          row_names_gp = gpar(fontsize = 8),
         width = unit(6, "inch"))
+        
+pdf("plots/chk24.pdf", width = 8, height = 10)
+print(y)
+dev.off()
 ```
 
+
+```{r, fig.height=12, fig.width = 20, fig.cap = "editing per Chromosome per sample"}
+library(dplyr)
+library(tidyr)
+library(ComplexHeatmap)
+library(circlize)
+library(viridis)
+library(grid)
+
+aei_vals <- readRDS("aei_vals.rds")
+df <- aei_vals$AEI_per_chrom
+
+df_ag <- df %>%
+  filter(allele == "A_G")
+heatmap_df <- df_ag %>%
+  select(bam_file, chrom, prop) %>%
+  pivot_wider(names_from = chrom, values_from = prop)
+
+# Convert to matrix
+mat <- as.data.frame(heatmap_df)
+rownames(mat) <- mat$bam_file
+mat$bam_file <- NULL
+mat <- as.matrix(mat)
+mat_scaled <- t(scale(t(mat)))
+
+
+x <- Heatmap(mat_scaled,
+             name = "A-G editing per chrom",
+             cluster_rows = FALSE,
+             row_names_side = "left",
+             col = viridis(100),
+             row_names_gp = gpar(fontsize = 8),
+             width = unit(8, "inch"))
+
+pdf("plots/APChrom_scaled.pdf", width = 10, height = 10)
+print(x)
+dev.off()
+
+
+Heatmap(mat_scaled,
+             name = "A-G editing per chrom",
+             cluster_rows = FALSE,
+             row_names_side = "left",
+             col = viridis(100),
+             row_names_gp = gpar(fontsize = 8),
+             width = unit(8, "inch"))
+```
 
 ## Hyperediting Detection
 
 ```{r}
-data_dir <- here("data/2024-04-04/hyperediting/bed_filtered/")
+data_dir <- ("/data7/data_Mary3/2024-04-04/hyperediting/bed_filtered/")
 col_vals <- MetBrewer::met.brewer("Java", 12) 
 
 alleles  <- list(
@@ -656,6 +917,7 @@ names(edit_dat) <- alleles
 edit_dat <- rbindlist(edit_dat, idcol ="allele")
  
 edit_dat$condition <- sub("_[ABC]$", "", as.character(edit_dat$sample))
+#edit_dat[, condition := sub("_[ABC]$", "", as.character(sample))]
 fwrite(edit_dat, "hyperediting_sites.tsv.gz")
 ```
 
@@ -674,7 +936,7 @@ edit_dat_summary <- edit_dat[, .(supporting_reads = length(unique(id))),
                                                               strand, 
                                                               sep = ":")
                                              ]
-
+edit_dat_summary
 ```
 
 A-to-G hyperediting sites will be re-quantified with original BAM to generate counts of A and G in normally mapped reads overlapping the hyperedited sites. 
@@ -730,8 +992,17 @@ n_samples <- length(unique(edit_dat_summary$sample))
 edit_dat_summary$condition <- sub("_[ABC]$", "", as.character(edit_dat_summary$sample))
 edit_dat_summary$condition <- factor(edit_dat_summary$condition, levels = sample_order)
 
-col_pal <- c(scales::brewer_pal(palette = "Paired")(12), 
-             scales::viridis_pal(option = "H")(n_samples - 12))
+#col_pal <- c(scales::brewer_pal(palette = "Paired")(12), 
+#             scales::viridis_pal(option = "H")(n_samples - 12))
+
+if (n_samples <= 15) {
+  col_pal <- scales::brewer_pal(palette = "Paired")(n_samples)
+} else {
+  col_pal <- c(
+    scales::brewer_pal(palette = "Paired")(15),
+    scales::viridis_pal(option = "H")(n_samples - 15)
+  )
+}
 
 edit_dat_summary <- edit_dat_summary[, .N, by = .(sample, condition, allele)]  
 
@@ -768,10 +1039,32 @@ p <- plt_summary[allele == "A_to_G", ] |>
   theme(legend.position = "none")
 
 p 
+save_plot("plots/he_site_variant.pdf", p)
 ```
 
 ```{r}
-##{r fig.width = 12, fig.height = 7}
+p <- plt_summary[allele == "A_to_G", ] |>
+  
+  ggplot(aes(forcats::fct_rev(condition), norm_he_sites)) +
+  geom_jitter(width = 0.1) +
+  coord_flip() + 
+  stat_summary(
+    fun.y = "mean",
+    col = "red",
+    size = 0.2,
+    shape = 3
+  ) + 
+  labs(y = "# of hyper-edited sites\n(per million reads)",
+        x = NULL) +
+   scale_color_manual(values = col_pal) +
+  theme(legend.position = "none")
+
+p 
+
+save_plot("plots/chk30.pdf", p, base_asp = 1, base_height = 4)
+```
+
+```{r}
 p <- plt_summary[allele == "A_to_G" & plt_summary$condition %in% subset_to_plot, ] |>
   ggplot(aes(condition, norm_he_sites)) +
   geom_jitter(width = 0.1) +
@@ -786,15 +1079,31 @@ p <- plt_summary[allele == "A_to_G" & plt_summary$condition %in% subset_to_plot,
    scale_color_manual(values = col_pal) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 p
-save_plot("plots/he_reads.pdf", p, base_asp = 1, base_height = 4)
+save_plot("plots/chk31.pdf", p, base_asp = 1, base_height = 4)
 ```
 
 ```{r, fig.height = 8, fig.width = 12, fig.cap="Number of hyperediting sites per sample as a heatmap"}
 hmat <-  dcast(edit_dat_summary, ... ~ allele, fill = 0) |>
   as.data.frame()
+  
+#Remove NA sample rows
+hmat <- hmat[!is.na(hmat$sample), ]
+
 rownames(hmat) <- hmat$sample
 hmat$sample <- NULL
 hmat$condition <- NULL
+h <- Heatmap(hmat, 
+         name = "Hyperediting sites",
+         cluster_rows = FALSE,
+         row_names_side = "left",
+         col = viridis(100),
+         row_names_gp = gpar(fontsize = 8),
+        width = unit(6, "inch"))
+
+pdf("plots/heHeatmap1.pdf", h, width = 8, height = 10)
+print(h)
+dev.off()
+
 Heatmap(hmat, 
          name = "Hyperediting sites",
          cluster_rows = FALSE,
@@ -802,6 +1111,7 @@ Heatmap(hmat,
          col = viridis(100),
          row_names_gp = gpar(fontsize = 8),
         width = unit(6, "inch"))
+
 ```
 
 
@@ -816,7 +1126,8 @@ plt_dat <- data.frame(aei_values = aeis,
            he_sites = he_vals[names(aeis)]) 
 
 cor_linear <- signif(cor(plt_dat$aei_values, plt_dat$he_sites), 2)
-   geom_point() +
+p1 <- ggplot(plt_dat, aes(aei_values, he_sites)) + 
+  geom_point() +
     labs(x = "AEI",
          y = "hyperediting sites") +
     annotate(x = 0.2, y = 0.9 * max(plt_dat$he_sites),
@@ -835,6 +1146,12 @@ p2 <- ggplot(plt_dat, aes(aei_values, he_sites)) +
              label = paste0("r = ", cor_log))
 
 plot_grid(p1, p2, ncol = 2, nrow = 1)
+
+grid_plot <- plot_grid(p1, p2,  
+          labels = c('A', 'B'),
+          ncol = 2, nrow = 1)
+
+ggsave("plots/chk33.pdf", plot = grid_plot, width = 8, height = 8, units = "in")
 
 ```
 
@@ -923,9 +1240,8 @@ if(!file.exists("rse-final.rds")) {
   
   nh_rse <- rse[non_he_sites, ]
   
-  # I can't use rbind on these summarizedExperiemtns for some reason.
-  # get a names don't match error ?
-  # I'll just do it manually
+  #calculate edit_freq to get equal column number to  
+  he_rse <- calc_edit_frequency(he_rse)
   
   n_assays <- length(assays(nh_rse))
   assay_nms <- assayNames(nh_rse)
@@ -948,37 +1264,26 @@ if(!file.exists("rse-final.rds")) {
   rse <- readRDS("rse-final.rds")
 }
 
+he_rse
+
+rse
 ```
 
-
-Next I will perform differential editing analysis to identify RNA editing sites with varying editing frequencies across samples. This method will leverage the n = 3 replicates and use a DESeq2 based model for the statistical testing. 
+Next I will perform differential editing analysis to identify RNA editing sites with varying editing frequencies across samples. This method will leverage the n = 3 replicates and use a DESeq2 based model for the statistical testing.
 
 
 ```{r}
+rse <- readRDS("rse-final.rds")
+
 rse$condition <- sub("_[ABC]$", "", as.character(rse$sample))
 rse$condition <- factor(rse$condition, levels = sample_order)
 rse$sample <- factor(rse$sample)
 
 if(!file.exists("differential_editing_results.rds")) {
   conds <- list(
-    c("wild-type_plus_IFNb", "wild-type_minus_IFNb"),
-    c("wild-type_plus_IFNb_plus_DOX", "wild-type_plus_IFNb"),
-    c("ADAR1_KO", "wild-type_plus_IFNb"),
-    c("ADAR1p150_KO", "wild-type_plus_IFNb"),
-    
-    c("p150_minus_DOX", "ADAR1p150_KO"),
-    c("p150_plus_DOX", "p150_minus_DOX"),
-    
-    c("deltaZalpha", "p150_plus_DOX"),
-    c("N173S", "p150_plus_DOX"),
-    c("P193A", "p150_plus_DOX"),
-    c("N173A_Y177A", "p150_plus_DOX"),
-    c("H910Q_E912A", "p150_plus_DOX"),
-    c("deltaZbeta", "p150_plus_DOX"),
-    c("delta_one", "p150_plus_DOX"),
-    c("double", "p150_plus_DOX")
+    c("wild-type_plus_IFNb", "wild-type_minus_IFNb")
   )
-  
+
   de_res_all <- lapply(conds, function(x) {
     message(x)
     filt_rse <- rse[, rse$condition %in% x]
@@ -996,7 +1301,7 @@ if(!file.exists("differential_editing_results.rds")) {
                                 condition_treatment = x[1]
     )
   })
-  
+
   de_res_all <- lapply(de_res_all, function(x) {
     xx <- x$results_full
     xx <- xx[which(xx$padj < 0.05), ]
@@ -1014,10 +1319,10 @@ n_sig_sites <- sapply(de_res_all, function(x) x$sig_results |> nrow())
 sig_sites <- data.frame(comparision = names(n_sig_sites), significant_sites = n_sig_sites,
            row.names = NULL)
 
-ggplot(sig_sites, aes(comparision, significant_sites)) + 
-  geom_bar(stat = "identity") + 
-  coord_flip() + 
-  theme_minimal() + 
+ggplot(sig_sites, aes(comparision, significant_sites)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  theme_minimal() +
   labs(x = "comparision", y = "# of significant sites")
 ```
 
@@ -1050,14 +1355,14 @@ lv_res <- lapply(conds, function(to_test) {
                                      deobj$count == "alt", ])
   ref_treatment <- colMeans(design[deobj$condition == condition_treatment &
                                      deobj$count == "ref", ])
-  
+
   alt_control <- colMeans(design[deobj$condition == condition_control &
                                    deobj$count == "alt", ])
   ref_control <- colMeans(design[deobj$condition == condition_control &
                                    deobj$count == "ref", ])
-  
+
   contrast_to_test <- (alt_treatment - ref_treatment) - (alt_control - ref_control)
-  
+
   tmp <- contrasts.fit(fit, contrast_to_test)
   tmp <- eBayes(tmp)
   tt <- topTable(tmp, sort.by = "P", n = Inf)
@@ -1067,7 +1372,7 @@ lv_res <- lapply(conds, function(to_test) {
 lv_res <- lapply(lv_res, function(x) {
   xx <- list()
   xx$results_full <- x
-  
+
   x <- x[which(x$adj.P.Val < 0.05), ]
   x <- x[order(x$P.Value), ]
   xx$sig_results <- as.data.frame(x)
@@ -1119,15 +1424,17 @@ p110_sites <- de_res_all$`ADAR1_KO_vs_wild-type_plus_IFNb`$sig_results |>
   rownames() |>
   setdiff(p150_sites)
 cols_to_keep <- rse$condition %in% subset_to_plot
+```
 
-plot_editing_heatmap(rse[, cols_to_keep],
+```{r, fig.width = 12, fig.height= 12}
+p <- plot_editing_heatmap(rse[, cols_to_keep],
                      p150_sites,
                      show_row_names = FALSE, name = "Editing Frequency",
                      column_title = paste0("p150 dependent editing sites, (n = ", 
                                            length(p150_sites), 
                                            ")"))
 
-plot_editing_heatmap(rse[, cols_to_keep],
+pp <- plot_editing_heatmap(rse[, cols_to_keep],
                      p150_sites, 
                      show_row_names = FALSE,
                      scale = TRUE, 
@@ -1135,6 +1442,17 @@ plot_editing_heatmap(rse[, cols_to_keep],
                      column_title = paste0("p150 dependent editing sites, (n = ", 
                                            length(p150_sites), 
                                            ")"))
+                                           
+p
+pp 
+
+pdf("plots/p150_sites.pdf", width = 8, height = 10)
+print(p)
+dev.off()
+         
+pdf("plots/p150_sites_zscore.pdf", width = 8, height = 10)
+print(pp)
+dev.off()         
 ```
 
 ```{r, fig.width =6, fig.height=6}
@@ -1143,13 +1461,20 @@ ef <- assays(rse)$edit_freq[p150_sites, cols_to_keep]
 ef <- t(ef) |> as.data.frame()
 ef$sample <- rownames(ef)
 ef$condition <- colData(rse)$condition[cols_to_keep]
-ef <- melt(ef, id.vars = c("sample", "condition"))
-ggplot(ef, aes(condition, value)) + 
-  geom_boxplot(outlier.shape = NA) +
-  labs(x = NULL,
-       y = "Editing Frequency",
-       subtitle = "p150 dependent editing sites") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+#ef <- melt(ef, id.vars = c("sample", "condition"))
+
+#library(tidyr)
+#ef <- pivot_longer(ef,
+#  cols = -c(sample, condition),
+#  names_to = "site",
+#  values_to = "value")
+
+#ggplot(ef, aes(condition, value)) + 
+#  geom_boxplot(outlier.shape = NA) +
+#  labs(x = NULL,
+#       y = "Editing Frequency",
+#       subtitle = "p150 dependent editing sites") +
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
 
 ```{r, fig.cap="Editing frequency (# of edited reads / total reads) of p150  sites summed across each sample."}
@@ -1175,18 +1500,20 @@ pa <- ggplot(edit_idx, aes(condition, edit_idx)) +
     y = "Editing index (p150 sites)") +
   theme(axis.text.x =element_text(angle = 90, hjust = 1, vjust = 0.5))
 pa
+save_plot("plots/p150_sites_idx.pdf", pa, base_asp = 1, base_height = 4)
+
 ```
 
 
 ```{r, fig.width = 12, fig.height= 12}
-plot_editing_heatmap(rse[, cols_to_keep],
+p <- plot_editing_heatmap(rse[, cols_to_keep],
                      p110_sites,
                      show_row_names = FALSE, name = "Editing Frequency",
                      column_title = paste0("p110 dependent editing sites, (n = ", 
                                            length(p110_sites), 
                                            ")"))
 
-plot_editing_heatmap(rse[, cols_to_keep],
+pp <- plot_editing_heatmap(rse[, cols_to_keep],
                      p110_sites, 
                      show_row_names = FALSE,
                      scale = TRUE, 
@@ -1194,6 +1521,16 @@ plot_editing_heatmap(rse[, cols_to_keep],
                      column_title = paste0("p110 dependent editing sites, (n = ", 
                                            length(p110_sites), 
                                            ")"))
+p
+pp 
+
+pdf("plots/p110_sites.pdf", width = 8, height = 10)
+print(p)
+dev.off()
+         
+pdf("plots/p110_sites_zscore.pdf", width = 8, height = 10)
+print(pp)
+dev.off()  
 ```
 
 ```{r, fig.width = 6, fig.height=6}
@@ -1202,13 +1539,20 @@ ef <- assays(rse)$edit_freq[p110_sites, cols_to_keep]
 ef <- t(ef) |> as.data.frame()
 ef$sample <- rownames(ef)
 ef$condition <- colData(rse)$condition[cols_to_keep]
-ef <- melt(ef, id.vars = c("sample", "condition"))
-ggplot(ef, aes(condition, value)) + 
-  geom_boxplot(outlier.shape = NA) +
-  labs(x = NULL,
-       y = "Editing Frequency",
-       subtitle = "p110 dependent editing sites") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+#ef <- melt(ef, id.vars = c("sample", "condition"))
+
+#library(tidyr)
+#ef <- pivot_longer(ef,
+#  cols = -c(sample, condition),
+#  names_to = "site",
+#  values_to = "value")
+
+#ggplot(ef, aes(condition, value)) + 
+#  geom_boxplot(outlier.shape = NA) +
+#  labs(x = NULL,
+#       y = "Editing Frequency",
+#       subtitle = "p110 dependent editing sites") +
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
 
 
@@ -1235,22 +1579,30 @@ pa <- ggplot(edit_idx, aes(condition, edit_idx)) +
     y = "Editing index (p110 sites)") +
   theme(axis.text.x =element_text(angle = 90, hjust = 1, vjust = 0.5))
 pa
+save_plot("plots/p110_sites_idx.pdf", pa, base_asp = 1, base_height = 4)
+
 ```
 
 Next i'll plot the top 12 editing sites differentially edited in ADAR1p150_KO vs wild-type_plus_IFNb. 
 
 Notice how the pattern in these individual sites mirrors the global pattern seen in the heatmaps and overall editing indexes. Namely, the delta z alpha and AGS mutations very subtly reduce editing levels compared to the p150_plus_Dox controls. 
 
-```{r, fig.width = 12, fig.height = 18}
+```{r, fig.width = 12, fig.height = 30}
 plts <- lapply(p150_sites[1:12], plot_editing_counts, rse = rse)
-plot_grid(plotlist = plts, nrow = 4, ncol = 3)
+#plot_grid(plotlist = plts, nrow = 4, ncol = 3)
+
+plot_grid(plotlist = plts, ncol = 3)
+
 ```
 
 For completeness here are the top 12 sites most differentially edited in the ADAR1_KO vs wild-type_plus_IFNb.
 
-```{r, fig.width = 12, fig.height = 18}
+```{r, fig.width = 12, fig.height = 30}
 plts <- lapply(p110_sites[1:12], plot_editing_counts, rse = rse)
-plot_grid(plotlist = plts, nrow = 4, ncol = 3)
+#plot_grid(plotlist = plts, nrow = 4, ncol = 3)
+
+plot_grid(plotlist = plts, ncol = 3)
+
 ```
 
 ```{r}
@@ -1273,7 +1625,6 @@ saveWorkbook(wb, "differential_editing_results.xlsx", overwrite = TRUE)
 ```
 
 
-
 ## Session info
 
 <details style="margin-bottom:10px;">
@@ -1287,3 +1638,4 @@ sessionInfo()
 
 
 </details>
+
