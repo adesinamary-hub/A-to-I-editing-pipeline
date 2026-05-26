@@ -44,12 +44,14 @@ TxDb(Mus.musculus) <- TxDb.Mmusculus.UCSC.mm39.knownGene
 threads <- 24
 theme_set(theme_cowplot())
 
+# path to gtf annotation
 gtf <- import.gff("/data7/ADAR1_062025_Novogene/04.Ref/genome.gtf.gz")
 
 if (!dir.exists("plots")) dir.create("plots")
 ```
 
 ```{r}
+# update sample_id and path as stored in 'DATA' e.g /data7/Kleinova/2024-04-04/
 sample_order <- c("ADAR1p110-replica",
                   "ADAR1p150-replica",
                   "RFP_editase_neg_ctrl"
@@ -80,12 +82,14 @@ samples <- unlist(
 
 sample_info <- data.frame(sample_id = factor(samples, levels = samples), 
 
+# path to star output in 'DATA'
   bam_fn = file.path("/data7/Kleinova/2024-04-04/star/",  
 
                      samples,  
 
                      paste0(samples, "_dedup_sorted.bam")), 
 
+# path to salmon output in 'DATA'
             salmon_fn = file.path("/data7/Kleinova/2024-04-04/salmon",  
 
                         samples,  
@@ -251,10 +255,11 @@ plot_counts <- function(dds, gene) {
 ```
 
 ```{r, fig.width = 6, fig.height = 60}
-#Mouse specific gene names
+#Mouse specific gene names, can be modified to any specific genes
 plts <- lapply(c("Ifnb1", "Isg15", "Ifit2", "Ifih1", "Ddx58", "Ddx39b", "Oas2", "Ifna2", "Ifna11", "Ifnar1", "Ifnar2", "Eif2ak2", "Zbp1", "Adar", "Adarb1", "Adarb2"),
  plot_counts, dds = dds)
 
+# adjust "nrow" to number of genes  
 genes_plot <- plot_grid(plotlist = plts, ncol = 1, nrow = 16)
 pdf("plots/chk9.pdf", width = 6, height = 50)
 print(genes_plot)  
@@ -319,6 +324,7 @@ dev.off()
 Examine A-to-I editing sites. Sites from the rediportal database will be quantified.
 
 ```{r}
+#path to genome fasta file
 fafn <- "/genome.fa"
 
 outfn_se <- "REDIportal_rse.rds"
@@ -404,6 +410,7 @@ library(rtracklayer)
 library(GenomicRanges)
 
 if(!file.exists("mm39_snps_genic_sines_fol.bed.gz")) {
+#path to SNPs BED file 
 snp_bed_file <- "/mouse_snps_merged.sorted.bed"
 
 # Import SNPs from the BED file
@@ -874,6 +881,7 @@ Heatmap(mat_scaled,
 ## Hyperediting Detection
 
 ```{r}
+#path to output directory of hyperediting pre-processing
 data_dir <- ("/2024-04-04/hyperediting/bed_filtered/")
 col_vals <- MetBrewer::met.brewer("Java", 12) 
 
@@ -1163,7 +1171,8 @@ edit_dat[, c("cl_start", "cl_end") := tstrsplit(mismatches, ":")]
 
 he_sites <- edit_dat[, .(n_mismatches = length(unique(start))), by = .(chrom, cl_start, cl_end, strand, condition)]
 
-p150_conds  <- c("ADAR1p110-replica", "ADAR1p150-replica")
+#update conditions based on sample ID in 'DATA'
+p150_conds  <- c("ADAR1p110-replica", "ADAR1p150-replica", "RFP_editase_neg_ctrl")
 he_sites <- he_sites[condition %in% p150_conds]
 he_sites <- makeGRangesFromDataFrame(he_sites, 
                                      keep.extra.columns = TRUE,
