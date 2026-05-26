@@ -1,4 +1,4 @@
-# A-to-I RNA Editing Analysis Pipeline
+# A-to-I Editing Landscape Analysis Pipeline (AEDITscape)
 
 This repository contains a computational workflow for the detection, quantification, annotation, and differential analysis of A-to-I RNA editing events from RNA-seq datasets in both human and mouse samples. The workflow integrates conventional editing detection, hyperediting analysis, transcript quantification, statistical analysis, and visualization using Snakemake workflows and R Markdown scripts.
 
