@@ -1,5 +1,5 @@
 ---
-title: "Quantitative analysis of A-to-I RNA editing in Human"
+title: "AEDITscape_Nichols et al"
 output:
   html_document:
     toc: true
@@ -41,10 +41,12 @@ TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
 
 threads <- 24
 theme_set(theme_cowplot())
+
+#update sample ID
 gtf <- import.gff("/data7/genome_Hg38/GRCh38.primary_assembly.gtf.gz")
 ```
 
-# update sample_order, subset_to_plot, and subset_nice_labels to match your sample groups/ ocnditions
+# update sample_order, subset_to_plot, and subset_nice_labels to match your sample ID
 ```{r}
 sample_order <- c("wild-type_minus_IFNb",
                   "wild-type_plus_IFNb",
