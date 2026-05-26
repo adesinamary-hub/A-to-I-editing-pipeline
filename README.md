@@ -71,10 +71,15 @@ Run the workflows within the `/editing` directory.
 snakemake --help   
 ```
 4. Modify snakecharmer.sh script depending on your cluster/local setup
-5. Test run to confirm that all file paths are accurate. This would simply run, without executing
+5. Return to /editing directory
+```bash
+cd  ..
+```
+7. Test run to confirm that all file paths are accurate. This would simply run, without executing
 ```bash
 snakemake -n -p
 ```
+
 6. Run 
 ```bash
 snakemake -p 
