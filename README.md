@@ -125,7 +125,16 @@ bash snakecharmer.sh
 ## Step 3 — Downstream Analysis in R
 
 1. Update sample ID and file paths in script
-2. Run the Markdown file in:
+2. successful running of the pipeline depends on sample ID suffix e.g Alphabeth suffix ("Wildtype_A") or number suffux ("Wildtype_1")
+```bash
+# for Alphabeth suffix (A, B, C), modify callout '$condition' throughout the Markdown to 
+$condition <- sub("_[ABC]$", "",
+```
+```bash
+#for number suffix (0, 1, 2, ...10) modify callout '$condition' throughout the Markdown 
+$condition <- sub("_[0-9]$", "",
+```
+4. Run the Markdown file in:
 
 - `/Rscript_Human` for human datasets
 - `/Rscript_Mouse` for mouse datasets
