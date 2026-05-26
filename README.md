@@ -132,10 +132,14 @@ bash snakecharmer.sh
 
 ```bash
 #Run on R studio or local run, this generates a log file
-nohup Rscript -e "rmarkdown::render('initial_analysis_mouse.Rmd')" > initial_analysis.log 2>&1 &
+nohup Rscript -e "rmarkdown::render('initial_analysis.Rmd')" > initial_analysis.log 2>&1 &
 ```
 ---
-
+view log file
+```bash
+tail -f initial_analysis.log
+```
+![Project Logo](images/R_run "output")  
 
 
 ###   File naming
