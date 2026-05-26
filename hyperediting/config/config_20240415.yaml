@@ -1,27 +1,28 @@
 # config for RNA-Variant discovery snakemake pipeline #
+#path to scripts directory
 LIB:
   "./workflow/scripts/"
-
+#path to raw FASTQ files
 RAW_DATA:
     "/beevol/home/riemondy/Projects/vicens/data/2024-04-04/star"
-
+#directory where output files will be stored
 DATA: 
     "/beevol/home/riemondy/Projects/vicens/data/2024-04-04/hyperediting"
-
+#path to indexed reference genome 
 GENOME:
   "/beevol/home/rbilab/ref/genome/human/GRCh38/dna/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
 
-  # path to 3-base bwa indices, will be generated if they do not exist
+ # path to 3-base bwa indices, will be generated if they do not exist
 BWA_IDX:
   "/beevol/home/riemondy/Projects/vicens/dbases/hyperediting/bwa_idx"
-
+#path to simple repeat file in /hyperediting/dbases directory, can be commented
 SIMPLE_REPEATS:
   "/beevol/home/riemondy/Projects/vicens/dbases/hyperediting/unique_simple_repeats.txt"
 
-# on of fr-first-strand or fr-second-strand
+# strand-specific information of sequenced data; fr-first-strand or fr-second-strand
 LIBRARY_TYPE:
     - "fr-first-strand"
-
+# condition/group name prefix (conditions are in triplicates)
 FASTQ:
   - ADAR1_KO_A/ADAR1_KO_A
   - ADAR1_KO_B/ADAR1_KO_B
@@ -81,6 +82,7 @@ FASTQ:
   - wild-type_plus_IFNb_plus_DOX_B/wild-type_plus_IFNb_plus_DOX_B
   - wild-type_plus_IFNb_plus_DOX_C/wild-type_plus_IFNb_plus_DOX_C
 
+# BAM filename suffixes generated after editing preprocessing
 FASTQ_SUFFIX:
     R1: "_Unmapped.out.mate1.fastq.gz"
     R2: "_Unmapped.out.mate2.fastq.gz"

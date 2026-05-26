@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE,
                       message = FALSE)
 ```
-
+#install libraries
 ```{r}
 library(here)
 library(ggplot2)
@@ -44,6 +44,7 @@ theme_set(theme_cowplot())
 gtf <- import.gff("/data7/genome_Hg38/GRCh38.primary_assembly.gtf.gz")
 ```
 
+# update sample_order, subset_to_plot, and subset_nice_labels to match your sample groups/ ocnditions
 ```{r}
 sample_order <- c("wild-type_minus_IFNb",
                   "wild-type_plus_IFNb",

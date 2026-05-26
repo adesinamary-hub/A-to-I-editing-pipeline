@@ -59,7 +59,7 @@ Mouse-specific analyses include editing quantification within repetitive SINE el
 # Workflow Overview
 
 The pipeline should be run in the following order:
-
+Download all folders into your working environment.
 
 ## Step 1 
 
@@ -75,7 +75,7 @@ snakemake --help
 ```bash
 snakemake -n -p
 ```
-6. Run the pipeline 
+6. Run 
 ```bash
 snakemake -p 
 ```
@@ -84,40 +84,73 @@ snakemake -p
 ## Step 2
 
 Run the workflows within the `/hyperediting` directory.
-1. 
 
----
+1. Update config/config_20240415.yaml file
+2. Update config/lib_params_240404.tsv with correct FASTQ ID, sample ID, library type
+3. Install Required dependencies
+   The required dependencies can be installed as a conda environment
+which will be named `hyperediting`. Alternatively, the required dependencies
+can be installed manually and should work as long as they are found in 
+the PATH.
+
+```bash
+conda env create -f environment.yaml
+```
+
+```bash
+conda activate hyperediting
+```
+Test the snakemake pipeline
+```bash
+snakemake -npr 
+```
+
+Modify #relevant command in snakecharmer.sh script depending on your cluster/local setup
+and run the pipeline
+
+```bash
+# on a lsf cluster
+bsub < snakecharmer.sh
+
+# on a local run
+bash snakecharmer.sh
+```
+
 
 ## Step 3 — Downstream Analysis in R
 
-Run the R Markdown workflows in:
+1. Update condition name and file paths in script
+2. Run the R Markdown workflows in:
 
 - `/Rscript_Human` for human datasets
 - `/Rscript_Mouse` for mouse datasets
 
+```bash
+#Run on R studio or local run
+nohup Rscript -e "rmarkdown::render('AEI_analysis_Mouse.Rmd')" > analysis.log 2>&1 &
+```
 ---
 
 
 
+###   File naming
+condition /sample group name should follow this order; condition, "_", number (0-10) 
+
+e.g - `Wildtype_1`, `KO_1`, `Negative_ctrl_1`
 
 
 
+## Software Requirements
 
+#### Core Software
 
-# Software Requirements
-
-## Core Software
-
-- R (≥ 4.1)
-- Python (> 3.0)
-- Snakemake
-- STAR
-- Salmon
-- samtools
-- bwa
-- fastp
+- R (≥ 4.4)
+- Python (≥ 3.12.0)
+- snakemake (≥ 9.5.1)
+- cutadapt (≥ 1.8.3)
+- STAR (≥ 2.7.11)
+- salmon (≥ 1.10.1)
+- samtools (≥ 1.21)
+- bwa (≥ 0.7.19)
+- fastp (≥ 1.0.1)
 ---
-
-# Contact
-
-For questions, suggestions, or collaborations, please open an issue in this repository.
