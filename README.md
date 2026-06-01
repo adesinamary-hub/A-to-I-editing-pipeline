@@ -124,14 +124,14 @@ bash snakecharmer.sh
 
 ## Step 3 — Downstream Analysis in R
 
-1. Update sample ID and file paths in script
-2. A successful running of the R MarkDown depends on sample ID suffix per dataset e.g Alphabet suffix ("Wildtype_A") or number suffix ("Wildtype_1")
+1. Update sample ID and file paths in R Markdown files
+2. A successful run depends on the sample ID suffix per dataset, e.g Alphabet suffix ("Wildtype_A") or number suffix ("Wildtype_1")
 ```bash
-# for Alphabeth suffix (A, B, C), modify callout '$condition' throughout the Markdown to 
+# for Alphabet suffix (A, B, C), modify condition command '$condition' throughout the Markdown to 
 $condition <- sub("_[ABC]$", "",
 ```
 ```bash
-#for number suffix (0, 1, 2, ...10) modify callout '$condition' throughout the Markdown 
+#for number suffix (0, 1, 2, ...10) modify condition command '$condition' throughout the Markdown 
 $condition <- sub("_[0-9]$", "",
 ```
 4. Run the Markdown file in:
